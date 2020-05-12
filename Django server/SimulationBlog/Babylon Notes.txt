@@ -1,0 +1,18 @@
+
+using Babylon.js
+
+- get canvas, create engine and scene
+
+var canvas = document.getElementById("renderCanvas"); // Get the canvas element
+var engine = new BABYLON.Engine(canvas, true); // Generate the BABYLON 3D engine
+
+
+
+write createscene() function:
+
+	var scene = new BABYLON.Scene(engine);
+
+	- setup camera
+	- setup lights
+	- create or load meshes
+	- Animate?

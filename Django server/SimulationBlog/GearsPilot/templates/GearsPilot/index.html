@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <title>Babylon Template</title>
+
+        <style>
+            html, body {
+                overflow: hidden;
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+
+            #renderCanvas {
+                width: 100%;
+                height: 60%;
+                touch-action: none;
+            }
+        </style>
+
+        {% load static %}
+        <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+        <script src="https://preview.babylonjs.com/babylon.js"></script>
+        <script src="https://preview.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+        <script src="https://preview.babylonjs.com/gui/babylon.gui.js"></script>
+        <script src="https://code.jquery.com/pep/0.4.3/pep.js"></script>
+        <script src="{% static 'GearsPilot/BabylonScripts/KeyFrameAnimations.js' %}"> </script>
+        <script src="{% static 'GearsPilot/BabylonScripts/GearLoaders.js' %}"> </script>
+
+    </head>
+
+   <body>
+    <canvas id="renderCanvas" touch-action="none" onDrop = "dropHandler(event);"></canvas>
+    <div id="tester" style = "width:100%;height:40%;"> </div>
+
+
+
+
+    <script>
+
+    Tester = document.getElementById("tester");
+    var plt = Plotly.newPlot( Tester, [{
+      x: [0],
+      y: [0],}, {x:[0], y:[0]}],
+      {
+        margin : {t:0}
+      });
+
+    function addToGraph(x_data, y_data, traces) {
+      Plotly.extendTraces("tester", {x:[[x_data]], y:[[y_data]]}, traces);
+    }
+
+      var Gears = [];
+        var canvas = document.getElementById("renderCanvas"); // Get the canvas element
+        var engine = new BABYLON.Engine(canvas, true, {
+          deterministicLockstep: true,
+          lockstepMaxSteps: 4}); // Generate the BABYLON 3D engine
+        var time = 0;
+
+        /******* Add the create scene function ******/
+        var createScene = function () {
+
+            // Create the scene space
+            var scene = new BABYLON.Scene(engine);
+
+            // Add a camera to the scene and attach it to the canvas
+            var camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 2, 0.6 * Math.PI / 2, 2, new BABYLON.Vector3(0,80,90), scene);
+            camera.attachControl(canvas, true);
+
+            // Add lights to the scene
+            var light1 = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(1, 1, 0), scene);
+            var light2 = new BABYLON.PointLight("light2", new BABYLON.Vector3(0, 1, -1), scene);
+
+            // Add and manipulate meshes in the scene
+            // var sphere = BABYLON.MeshBuilder.CreateSphere("sphere", {diameter:2}, scene);
+            //var cube = BABYLON.MeshBuilder.CreateBox("box",{size:2}, scene );
+
+            var pointsArray = [[0,0,0],
+                               [0,20,0]];
+            var vecArray = [];
+            var i = 0;
+            for (let arr of pointsArray) {
+
+                vecArray[i] = new BABYLON.Vector3(arr[0],arr[1],arr[2]);
+                i++;
+            }
+
+            var line = BABYLON.MeshBuilder.CreateLines("line", {points: vecArray}, scene);
+
+
+            awaitLoadJSON(scene, Gears);
+            //console.log(Gears);
+
+            for (let g = 0; g < Gears.length; g++) {
+              Gears[g].setPivotPoint(new BABYLON.Vector3(26.661191,0,21.86734974), BABYLON.Space.WORLD);
+              console.log(Gears[g].getPivotPoint());
+            }
+
+
+            var advancedTexture = new BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("ui1");
+
+            var panel = new BABYLON.GUI.StackPanel();
+            panel.width = 0.25;
+
+            panel.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+            advancedTexture.addControl(panel);
+            var button1 = BABYLON.GUI.Button.CreateSimpleButton("but1", "Animate");
+            button1.width = "200px";
+            button1.height = "200px";
+            button1.color = "white";
+            button1.background = "black";
+            button1.onPointerUpObservable.add(function() {
+            });
+            panel.addControl(button1);
+
+            scene.registerBeforeRender(function () {
+              if (scene.meshes[5])
+              { let pos = scene.meshes[5].position;
+                pos.x = Math.round(pos.x * 10) / 10;
+                pos.y = Math.round(pos.y * 10) / 10;
+                pos.z = Math.round(pos.z * 10) / 10;
+                button1.textBlock.text = String(pos);
+                time += engine.getDeltaTime()/1000;
+                Plotly.extendTraces("tester", {x:[[time], [time]], y:[[pos.x], [pos.z]]}, [0,1]);
+
+              }
+
+            });
+
+
+            return scene;
+        };
+        /******* End of the create scene function ******/
+
+
+
+
+
+        var scene = createScene(); //Call the createScene function
+
+
+        // Register a render loop to repeatedly render the scene
+        engine.runRenderLoop(function () {
+                scene.render();
+        });
+
+        // Watch for browser/canvas resize events
+        window.addEventListener("resize", function () {
+                engine.resize();
+        });
+    </script>
+
+   </body>
+
+</html>
