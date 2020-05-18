@@ -34,7 +34,7 @@ def create_gear(name, involute, gear_height, location = None):
     # create new component
     if location is not None:
         transform = adsk.core.Matrix3D.create()
-        transform.translation = adsk.core.Vector3D.create(transform.translation.x + location.x, transform.translation.y, transform.translation.z)
+        transform.translation = adsk.core.Vector3D.create(transform.translation.x + location.x, transform.translation.y + location.y, transform.translation.z + location.z)
         new_component, new_occurence = create_new_component_and_occurrence(rootComp, transform_matrix = transform, name = name)
     else:
         new_component, new_occurence = create_new_component_and_occurrence(rootComp, name = "Planet1")
@@ -108,13 +108,15 @@ def run(context):
         I = Involute(pressure_angle, gear_pitch_diameter, gear_module)
 
 
-        gear1Comp, gear2Occ = create_gear("Planet1", I, 5, location = adsk.core.Vector3D.create(I._pitch_radius, 0, 0))
-        gear2Comp, gear2Occ = create_gear("Planet1", I, 5, location = adsk.core.Vector3D.create(-I._pitch_radius, 0, 0))
+        gear1Comp, gear2Occ = create_gear("Planet1", I, 5, location = adsk.core.Vector3D.create(I.pitch_diameter, 0, 0))
+        gear2Comp, gear2Occ = create_gear("Planet1", I, 5, location = adsk.core.Vector3D.create(0, 0, 0))
 
-        print(str(gear2Occ.transform))
         gear2_transform = gear2Occ.transform
+        angle_to_rotate = 0
+        if I._number_of_teeth % 2 == 1:
+            angle_to_rotate += pi / I._number_of_teeth
         gear2_transform.setToRotation(pi, adsk.core.Vector3D.create(0, 0, 1), adsk.core.Point3D.create(0, 0, 0))
-        gear2_transform.translation = adsk.core.Vector3D.create(-I._pitch_radius, 0, 0)
+        gear2_transform.translation = adsk.core.Vector3D.create(0, 0, 0)
         gear2Occ.transform = gear2_transform
     except Exception as error:
         print("Error: " + str(traceback.format_exc()))

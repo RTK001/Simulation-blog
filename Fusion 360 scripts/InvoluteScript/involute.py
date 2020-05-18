@@ -96,6 +96,7 @@ class Involute():
         return x, y
 
     def create_involute1(self, start_angle):
+        start_angle = start_angle - self._base_to_pitch_angle # involute is drawn from base circle, but top level meshing is determined at pitch circle
         x_coords, y_coords = (self._dedendum_radius * cos(start_angle), self._dedendum_radius * sin(start_angle))
         x_involute1, y_involute1 = self.calculate_involute(self._effective_base_radius, self._addendum_radius, a = start_angle)
         x_coords = append(x_coords, x_involute1)
@@ -103,6 +104,7 @@ class Involute():
         return x_coords, y_coords
 
     def create_involute2(self, start_angle):
+        start_angle = start_angle - self._base_to_pitch_angle # involute is drawn from base circle, but top level meshing is determined at pitch circle
         inverse_profile_start_angle = -start_angle - (pi * self.module / self._pitch_radius + 2 * self._base_to_pitch_angle)
 
         x_coords, y_coords = (self._dedendum_radius * cos(start_angle + self._dedendum_start_angle), self._dedendum_radius * sin(start_angle + self._dedendum_start_angle))
@@ -113,7 +115,7 @@ class Involute():
 
 
     def create_single_tooth(self, start_angle):
-        start_angle = start_angle - self._base_to_pitch_angle
+        start_angle = start_angle - self._base_to_pitch_angle # involute is drawn from base circle, but top level meshing is determined at pitch circle
         x_coords, y_coords = (self._dedendum_radius * cos(start_angle), self._dedendum_radius * sin(start_angle))
 
         x_involute1, y_involute1 = self.calculate_involute(self._effective_base_radius, self._addendum_radius, a = start_angle)
