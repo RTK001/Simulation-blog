@@ -3,6 +3,7 @@
 import adsk.core, adsk.fusion, traceback
 from math import pi
 from .InvoluteScript.involute import Involute
+import os.path
 
 def print(to_print):
     adsk.core.Application.get().userInterface.messageBox(to_print)
@@ -23,6 +24,26 @@ def create_new_component_and_occurrence(root_component, transform_matrix = None,
         new_component.name = name
     return new_component, new_occurrence
 
+def convert_to_valid_filename(filename):
+    to_replace = {"@":"",
+                "(": "",
+                 ")":"",
+                 "_": "_",
+                 " ": "_",
+                 ":":"_"}
+    new_name = filename
+    for key in to_replace.keys():
+        new_name = new_name.replace(key, to_replace[key])
+    return new_name
+
+def export_to_stl(component, folder, meshRefinement = adsk.fusion.MeshRefinementSettings.MeshRefinementLow):
+    app, design, rootComp, ui = setup_fusion_workspace()
+    exportMgr = adsk.fusion.ExportManager.cast(design.exportManager)
+    stlOptions = exportMgr.createSTLExportOptions(component)
+    stlOptions.meshRefinement = adsk.fusion.MeshRefinementSettings.MeshRefinementMedium
+    filename = os.path.join(folder, convert_to_valid_filename(str(component.name)) + ".stl")
+    stlOptions.filename = filename
+    exportMgr.execute(stlOptions)
 
 def create_gear(name, involute, gear_height, location = None):
 
@@ -34,7 +55,9 @@ def create_gear(name, involute, gear_height, location = None):
     # create new component
     if location is not None:
         transform = adsk.core.Matrix3D.create()
-        transform.translation = adsk.core.Vector3D.create(transform.translation.x + location.x, transform.translation.y + location.y, transform.translation.z + location.z)
+        transform.translation = adsk.core.Vector3D.create(  transform.translation.x + location.x,
+                                                            transform.translation.y + location.y,
+                                                            transform.translation.z + location.z)
         new_component, new_occurence = create_new_component_and_occurrence(rootComp, transform_matrix = transform, name = name)
     else:
         new_component, new_occurence = create_new_component_and_occurrence(rootComp, name = "Planet1")
@@ -94,6 +117,13 @@ def create_gear(name, involute, gear_height, location = None):
 def run(context):
     try:
 
+        export_folder = os.path.dirname(os.path.abspath(__file__))
+        export_folder = os.path.join(export_folder, "Saved STL files")
+        try:
+            os.mkdir(export_folder)
+        except FileExistsError:
+            pass
+
         # unique things:
         #   pressure angle
         #   module
@@ -108,8 +138,8 @@ def run(context):
         I = Involute(pressure_angle, gear_pitch_diameter, gear_module)
 
 
-        gear1Comp, gear2Occ = create_gear("Planet1", I, 5, location = adsk.core.Vector3D.create(I.pitch_diameter, 0, 0))
-        gear2Comp, gear2Occ = create_gear("Planet1", I, 5, location = adsk.core.Vector3D.create(0, 0, 0))
+        gear1Comp, gear1Occ = create_gear("Planet1", I, 5, location = adsk.core.Vector3D.create(I.pitch_diameter, 0, 0))
+        gear2Comp, gear2Occ = create_gear("Planet2", I, 5, location = adsk.core.Vector3D.create(0, 0, 0))
 
         gear2_transform = gear2Occ.transform
         angle_to_rotate = 0
@@ -118,5 +148,9 @@ def run(context):
         gear2_transform.setToRotation(pi, adsk.core.Vector3D.create(0, 0, 1), adsk.core.Point3D.create(0, 0, 0))
         gear2_transform.translation = adsk.core.Vector3D.create(0, 0, 0)
         gear2Occ.transform = gear2_transform
+
+        export_to_stl(gear1Occ, export_folder)
+        export_to_stl(gear2Occ, export_folder)
+
     except Exception as error:
         print("Error: " + str(traceback.format_exc()))
