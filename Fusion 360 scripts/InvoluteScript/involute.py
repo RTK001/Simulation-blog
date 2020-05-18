@@ -6,7 +6,6 @@ try:
 except ImportError:
     from .fakeNumpy import radians, cos, sin, tan, sqrt, pi, array, append, flip, empty, arange, linspace
 
-from pprint import pprint
 
 class Involute():
 
@@ -33,6 +32,7 @@ class Involute():
     3. create the whole wheel by creating each tooth individually
 
     '''
+
     def __init__(self, pressure_angle, pitch_diameter, module):
         self.pressure_angle = pressure_angle
         self.pitch_diameter = pitch_diameter
@@ -46,7 +46,6 @@ class Involute():
         # redefine module to snap to integer number of teeth
         self.module =  self._pitch_radius / self._number_of_teeth
         self._angle_between_teeth = pi * self.module / self._pitch_radius
-
 
         # Calculate addendum and dedendum based on metric gear definition,
         # https://www.sdp-si.com/resources/elements-of-metric-gear-technology/
@@ -70,18 +69,18 @@ class Involute():
         self._addendum_end_angle = self._addendum_start_angle + self._angle_between_teeth - 2 * self._pitch_to_addendum_angle
 
         self._dedendum_start_angle = self._angle_between_teeth + 2 * self._base_to_pitch_angle
-        self._dedendum_end_angle = self._dedendum_start_angle + self._angle_between_teeth
+        self._dedendum_end_angle = self._dedendum_start_angle + self._angle_between_teeth - 2 * self._base_to_pitch_angle
 
 
     def calculate_involute(self, start_radius, end_radius, a = 0, inverse = False):
         t_max = sqrt((end_radius / start_radius)**2 - 1) # Formula worked out by hand. It seems to work. Fortunately.
         if not inverse:
-            t = linspace(a, a + t_max, 10)
+            t = linspace(a, a + t_max, 50)
             x_prime = start_radius * (cos(t) + (t-a) * sin(t))
             y_prime = start_radius * (sin(t) - (t-a) * cos(t))
         else:
             a += pi/2 # to correct for mirroring curve
-            t = linspace(a, a + t_max, 10)
+            t = linspace(a, a + t_max, 50)
             x_prime = start_radius * (sin(t) - (t-a) * cos(t))
             y_prime = start_radius * (cos(t) + (t-a) * sin(t))
 
@@ -137,10 +136,10 @@ class Involute():
 
         return x_coords, y_coords
 
-    def create_wheel(self):
+    def create_wheel(self, start_angle = 0):
         x_coords = empty(0)
         y_coords = empty(0)
-        start_angles = linspace(0, 2*pi, self._number_of_teeth)
+        start_angles = linspace(start_angle, start_angle + 2*pi, self._number_of_teeth)
         for a in start_angles:
             x,y = self.create_single_tooth(a)
             x_coords = append(x_coords, x)

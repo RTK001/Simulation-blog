@@ -81,7 +81,14 @@ def empty(size):
 
 def arange(start, end, increment):
     range_length = int(math.floor((end-start) / increment))
-    return array((start + i*increment for i in range(range_length +1)))
+    arr = array((start + i*increment for i in range(range_length)))
+    if start + (range_length * increment) < end:
+        # Add end point if
+        arr = append(arr, end)
+    elif start + (range_length * increment) > end:
+        arr = arr[0:-2]
+        arr = append(arr, end)
+    return arr
 
 def linspace(start, end, number_items):
     increment = (end - start)/number_items

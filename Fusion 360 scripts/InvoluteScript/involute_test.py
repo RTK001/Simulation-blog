@@ -11,8 +11,9 @@ class GearsPlotter():
         self._module = module
         self.I = Involute(pressure_angle, pitch_diameter, 0.11)
         self.fig = plt.figure(figsize = [8,8])
-        self.ax = ax = plt.axes([0.05, 0.05 + 0.1, 0.9, 0.8])
+        self.ax = plt.axes([0.05, 0.05 + 0.1, 0.9, 0.8])
         self.plot_func = self.plot_wheels_and_circles
+        #self.plot_func = self.plot_single_tooth
         self.ax.axis("equal")
         self.ax.grid("on")
 
@@ -54,12 +55,12 @@ class GearsPlotter():
         self.plot_circle(self.I._pitch_radius, 'r--')
         self.plot_circle(self.I._base_radius, 'r--')
 
-    def plot_single_tooth(self, angle):
+    def plot_single_tooth(self, angle = 0):
         self.ax.lines = []
-        x, y = I.create_single_tooth(angle)
+        x, y = self.I.create_single_tooth(angle)
         self.ax.plot(x,y)
-        plot_circle(self.I._pitch_radius, 'r--')
-        plot_circle(self.I._base_radius, 'r--')
+        self.plot_circle(self.I._pitch_radius, 'r--')
+        self.plot_circle(self.I._base_radius, 'r--')
 
     def plot_circle(self, radius, *args, **kwargs):
         x,y = self.I.create_points_on_circle(radius)
@@ -68,14 +69,17 @@ class GearsPlotter():
     def plot_wheels_and_circles(self):
         self.ax.lines = []
         x, y = self.I.create_wheel()
-        self.ax.plot(x + self.I._pitch_radius, y, 'k')
+        self.ax.plot(x + self.I._pitch_radius, y, 'xk-')
         x, y = self.I.create_points_on_circle(self.I._pitch_radius)
         self.ax.plot(x + self.I._pitch_radius, y, 'r--')
         x, y = self.I.create_points_on_circle(self.I._base_radius)
         self.ax.plot(x + self.I._pitch_radius, y, 'r--')
 
-        x, y = self.I.create_wheel()
-        self.ax.plot(x - self.I._pitch_radius, y, 'k')
+        second_wheel_start = 0
+        if self.I._number_of_teeth % 2 == 1:
+            second_wheel_start += self.I._angle_between_teeth/2
+        x, y = self.I.create_wheel(start_angle = second_wheel_start)
+        self.ax.plot(x - self.I._pitch_radius, y, 'xk-')
         x, y = self.I.create_points_on_circle(self.I._pitch_radius)
         self.ax.plot(x - self.I._pitch_radius, y, 'r--')
         x, y = self.I.create_points_on_circle(self.I._base_radius)
@@ -98,7 +102,7 @@ sliders = []
 slider_axs = []
 
 for index, value in enumerate(props.keys()):
-    axs = plt.axes([0.15, 0.05 + index*slider_height, slider_width, slider_height])
+    axs = plt.axes([0.15, 0.01 + index*slider_height, slider_width, slider_height])
     S = Slider(axs, value, props[value]["min"], props[value]["max"], valinit = props[value]["initial"])
     S.on_changed(lambda m: type(GP).__dict__[value].__set__(GP, m))
     slider_axs.append(axs)
