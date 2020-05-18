@@ -76,6 +76,7 @@ class GearsPlotter():
 
     def plot_single_tooth(self, angle = 0):
         self.ax.lines = []
+        self.ax.patches = []
         x, y = self.I.create_single_tooth(angle)
         self.ax.plot(x,y)
         self.plot_text()
@@ -88,18 +89,19 @@ class GearsPlotter():
 
     def plot_wheels_and_circles(self):
         self.ax.lines = []
+        self.ax.patches = []
         x, y = self.I.create_wheel()
-        self.ax.plot(x + self.I._pitch_radius, y, 'k')
+        self.ax.fill(x + self.I._pitch_radius, y, 'k', alpha=0.5, facecolor = "green")
         x, y = self.I.create_points_on_circle(self.I._pitch_radius)
         self.ax.plot(x + self.I._pitch_radius, y, 'r--')
         x, y = self.I.create_points_on_circle(self.I._base_radius)
         self.ax.plot(x + self.I._pitch_radius, y, 'r--')
 
         second_wheel_start = self.second_wheel_start
-        #if self.I._number_of_teeth % 2 == 1:
-        #    second_wheel_start += self.I.module * pi
+        if self.I._number_of_teeth % 2 == 1:
+            second_wheel_start += self.I.module * pi
         x, y = self.I.create_wheel(start_angle = second_wheel_start)
-        self.ax.plot(x - self.I._pitch_radius, y, 'k')
+        self.ax.fill(x - self.I._pitch_radius, y, 'k', alpha=0.5, facecolor = "blue")
         x, y = self.I.create_points_on_circle(self.I._pitch_radius)
         self.ax.plot(x - self.I._pitch_radius, y, 'r--')
         x, y = self.I.create_points_on_circle(self.I._base_radius)

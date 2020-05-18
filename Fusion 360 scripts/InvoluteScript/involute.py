@@ -113,6 +113,7 @@ class Involute():
 
 
     def create_single_tooth(self, start_angle):
+        start_angle = start_angle - self._base_to_pitch_angle
         x_coords, y_coords = (self._dedendum_radius * cos(start_angle), self._dedendum_radius * sin(start_angle))
 
         x_involute1, y_involute1 = self.calculate_involute(self._effective_base_radius, self._addendum_radius, a = start_angle)
