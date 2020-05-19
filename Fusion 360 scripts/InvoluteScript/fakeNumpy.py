@@ -1,6 +1,8 @@
 
 import math
 
+from pdb import set_trace
+
 def allow_arrays(func):
     def wrapper(*args):
         if len(args) == 1 and isinstance(*args, array):
@@ -31,6 +33,8 @@ def radians(angle):
 
 @allow_arrays
 def cos(angle):
+    if not isinstance(angle, float) and len(angle) > 1:
+        pass
     return math.cos(angle)
 
 @allow_arrays
@@ -45,7 +49,7 @@ def tan(angle):
 def sqrt(val):
     return math.sqrt(val)
 
-pi = math.pi
+pi = math.pi # needed to provide fakeNumpy version of pi
 
 
 class array(list):

@@ -15,7 +15,7 @@ def setup_fusion_workspace():
     ui = app.userInterface
     return app, design, rootComp, ui
 
-def create_new_component_and_occurrence(root_component, transform_matrix = None, name = None):
+def create_component(root_component, transform_matrix = None, name = None):
     if transform_matrix is None:
         transform_matrix = adsk.core.Matrix3D.create()
     new_occurrence = root_component.occurrences.addNewComponent(transform_matrix)
@@ -23,6 +23,16 @@ def create_new_component_and_occurrence(root_component, transform_matrix = None,
     if name is not None and isinstance(name, str):
         new_component.name = name
     return new_component, new_occurrence
+
+def points_from_coordinates(x, y, z=None):
+    points = adsk.core.ObjectCollection.create()
+    if len(x) != len(y):
+        raise ValueError("x and y coordiantes should be the same length")
+    if z is None:
+        z = [0 for _ in x]
+    for i,_ in enumerate(x):
+            points.add(adsk.core.Point3D.create(x[i], y[i], z[i]))
+    return points
 
 def convert_to_valid_filename(filename):
     to_replace = {"@":"",
@@ -45,6 +55,20 @@ def export_to_stl(component, folder, meshRefinement = adsk.fusion.MeshRefinement
     stlOptions.filename = filename
     exportMgr.execute(stlOptions)
 
+def rotateOccurence(occ, angle, axis = 2, about = None):
+    transform = occ.transform
+    trl = transform.translation
+    ax = [0,0,0]
+    ax[axis] = 1
+    ax = adsk.core.Vector3D.create(ax[0], ax[1], ax[2])
+    if about is None:
+        pt = adsk.core.Point3D.create(trl.x, trl.x, trl.x)
+    else:
+        pt = adsk.core.Point3D.create(about[0], about[1], about[2])
+    transform.setToRotation(angle, ax, pt)
+    occ.transform = transform
+    return occ
+
 def create_gear(name, involute, gear_height, location = None):
 
     app, design, rootComp, ui = setup_fusion_workspace()
@@ -58,24 +82,22 @@ def create_gear(name, involute, gear_height, location = None):
         transform.translation = adsk.core.Vector3D.create(  transform.translation.x + location.x,
                                                             transform.translation.y + location.y,
                                                             transform.translation.z + location.z)
-        new_component, new_occurence = create_new_component_and_occurrence(rootComp, transform_matrix = transform, name = name)
+        new_component, new_occurence = create_component(rootComp, transform_matrix = transform, name = name)
     else:
-        new_component, new_occurence = create_new_component_and_occurrence(rootComp, name = "Planet1")
+        new_component, new_occurence = create_component(rootComp, name = "Planet1")
 
     # Sketch points
     gear_profile_sketch = new_component.sketches.add(new_component.xYConstructionPlane)
-    points = adsk.core.ObjectCollection.create()
-    points2 = adsk.core.ObjectCollection.create()
 
+    # create tooth profile for involute 1
     x1,y1 = I.create_involute1(tooth_start_angle)
-    x2,y2 = I.create_involute2(tooth_start_angle)
-
-    for i_point,_ in enumerate(x1):
-            points.add(adsk.core.Point3D.create(x1[i_point], y1[i_point], 0))
+    points = points_from_coordinates(x1, y1)
     gear_profile = gear_profile_sketch.sketchCurves.sketchFittedSplines.add(points)
 
-    for i_point,_ in enumerate(x2):
-            points2.add(adsk.core.Point3D.create(x2[i_point], y2[i_point], 0))
+
+    # create tooth profile for involute 2
+    x2,y2 = I.create_involute2(tooth_start_angle)
+    points2 = points_from_coordinates(x2, y2)
     gear_profile2 = gear_profile_sketch.sketchCurves.sketchFittedSplines.add(points2)
 
     # sketch dedendum circle and addendum arc
@@ -85,6 +107,7 @@ def create_gear(name, involute, gear_height, location = None):
     pitch_circle = gear_profile_sketch.sketchCurves.sketchCircles.addByCenterRadius(circle_centre, I._pitch_radius)
     pitch_circle.isConstruction = True
 
+    # constrain points on addendum circle
     gear_profile_sketch.geometricConstraints.addCoincident(addendum_circle.startSketchPoint, gear_profile.endSketchPoint)
     gear_profile_sketch.geometricConstraints.addCoincident(addendum_circle.endSketchPoint, gear_profile2.endSketchPoint)
 
@@ -133,21 +156,18 @@ def run(context):
         #   Location
         pressure_angle = 20
         gear_pitch_diameter = 20
-        gear_module = 0.8
+        gear_module = 0.9
         gear_height = 5
         I = Involute(pressure_angle, gear_pitch_diameter, gear_module)
 
+        angle_to_rotate = 0
+        if I._number_of_teeth % 2 == 1:
+            angle_to_rotate += pi / I._number_of_teeth
 
         gear1Comp, gear1Occ = create_gear("Planet1", I, 5, location = adsk.core.Vector3D.create(I.pitch_diameter, 0, 0))
         gear2Comp, gear2Occ = create_gear("Planet2", I, 5, location = adsk.core.Vector3D.create(0, 0, 0))
 
-        gear2_transform = gear2Occ.transform
-        angle_to_rotate = 0
-        if I._number_of_teeth % 2 == 1:
-            angle_to_rotate += pi / I._number_of_teeth
-        gear2_transform.setToRotation(pi, adsk.core.Vector3D.create(0, 0, 1), adsk.core.Point3D.create(0, 0, 0))
-        gear2_transform.translation = adsk.core.Vector3D.create(0, 0, 0)
-        gear2Occ.transform = gear2_transform
+        gear2Occ = rotateOccurence(gear2Occ, angle_to_rotate)
 
         export_to_stl(gear1Occ, export_folder)
         export_to_stl(gear2Occ, export_folder)

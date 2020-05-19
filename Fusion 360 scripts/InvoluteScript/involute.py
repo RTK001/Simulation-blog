@@ -75,12 +75,12 @@ class Involute():
     def calculate_involute(self, start_radius, end_radius, a = 0, inverse = False):
         t_max = sqrt((end_radius / start_radius)**2 - 1) # Formula worked out by hand. It seems to work. Fortunately.
         if not inverse:
-            t = linspace(a, a + t_max, 50)
+            t = linspace(a, a + t_max, 25)
             x_prime = start_radius * (cos(t) + (t-a) * sin(t))
             y_prime = start_radius * (sin(t) - (t-a) * cos(t))
         else:
             a += pi/2 # to correct for mirroring curve
-            t = linspace(a, a + t_max, 50)
+            t = linspace(a, a + t_max, 25)
             x_prime = start_radius * (sin(t) - (t-a) * cos(t))
             y_prime = start_radius * (cos(t) + (t-a) * sin(t))
 

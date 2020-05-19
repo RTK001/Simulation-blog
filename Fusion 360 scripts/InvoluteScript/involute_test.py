@@ -13,8 +13,11 @@ class GearsPlotter():
         self.I = Involute(pressure_angle, pitch_diameter, module)
         self.fig = plt.figure(figsize = [8,8])
         self.ax = plt.axes([0.05, 0.05 + 0.1, 0.9, 0.8])
-        self.plot_func = self.plot_wheels_and_circles
+
+        #self.plot_func = self.plot_wheels_and_circles
         #self.plot_func = self.plot_single_tooth
+        self.plot_func = self.plot_teeth_from_involutes
+
         self.text = None
         self.ax.axis("equal")
         self.ax.grid("on")
@@ -74,12 +77,22 @@ class GearsPlotter():
         self.plot_circle(self.I._pitch_radius, 'r--')
         self.plot_circle(self.I._base_radius, 'r--')
 
-
     def plot_single_tooth(self, angle = 0):
         self.ax.lines = []
         self.ax.patches = []
         x, y = self.I.create_single_tooth(angle)
         self.ax.plot(x,y)
+        self.plot_text()
+        self.plot_circle(self.I._pitch_radius, 'r--')
+        self.plot_circle(self.I._base_radius, 'r--')
+
+    def plot_teeth_from_involutes(self, angle = 0):
+        self.ax.lines = []
+        self.ax.patches = []
+        x,y = self.I.create_involute1(start_angle=angle)
+        self.ax.plot(x,y,'k')
+        x,y = self.I.create_involute2(start_angle=angle)
+        self.ax.plot(x,y,'k')
         self.plot_text()
         self.plot_circle(self.I._pitch_radius, 'r--')
         self.plot_circle(self.I._base_radius, 'r--')
