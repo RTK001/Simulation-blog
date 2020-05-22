@@ -1,5 +1,3 @@
-
-
 import adsk.core, adsk.fusion, traceback
 from math import pi
 from .InvoluteScript.involute import Involute
@@ -15,13 +13,23 @@ def setup_fusion_workspace():
     ui = app.userInterface
     return app, design, rootComp, ui
 
-def create_component(root_component, transform_matrix = None, name = None):
+def create_component(root_component, location = None, transform_matrix = None,  name = None):
+
+    if location is not None and transform_matrix is None:
+        transform_matrix = adsk.core.Matrix3D.create()
+        transform_matrix.translation = adsk.core.Vector3D.create(   transform_matrix.translation.x + location.x,
+                                                                    transform_matrix.translation.y + location.y,
+                                                                    transform_matrix.translation.z + location.z)
+
     if transform_matrix is None:
         transform_matrix = adsk.core.Matrix3D.create()
+
     new_occurrence = root_component.occurrences.addNewComponent(transform_matrix)
     new_component = new_occurrence.component
+
     if name is not None and isinstance(name, str):
         new_component.name = name
+
     return new_component, new_occurrence
 
 def points_from_coordinates(x, y, z=None):
@@ -46,6 +54,37 @@ def convert_to_valid_filename(filename):
         new_name = new_name.replace(key, to_replace[key])
     return new_name
 
+def Extrude(component, profile, type, height):
+    '''
+    Creates an extrude from a profile.
+
+    Allowable types:
+    adsk.fusion.FeatureOperations
+     eg/ JoinFeatureOperation
+        NewComponentFeatureOperation, etc.
+    '''
+    extrudes = component.features.extrudeFeatures
+    extInput = extrudes.createInput(profile, adsk.fusion.FeatureOperations.JoinFeatureOperation) # create an extrusion using the new feature operation.
+    extInput.setDistanceExtent(False, adsk.core.ValueInput.createByReal(height))
+    ext = extrudes.add(extInput)
+    return ext
+
+def booleanSubtract(targetComp, toolComp):
+    '''
+    Subtract one component from another.
+    The targetComp should only contain one body.
+    '''
+    if targetComp.bRepBodies.count > 1:
+        raise NotImplementedError
+    combines = targetComp.features.combineFeatures
+    toolBodies = adsk.core.ObjectCollection.create()
+    for i in range(toolComp.bRepBodies.count):
+        toolBodies.add(toolComp.bRepBodies.item(i))
+    combInput = combines.createInput(targetComp.bRepBodies.item(0), toolBodies)
+    combInput.operation = adsk.fusion.FeatureOperations.CutFeatureOperation
+    comb = combines.add(combInput)
+    return comb
+
 def export_to_stl(component, folder, meshRefinement = adsk.fusion.MeshRefinementSettings.MeshRefinementLow):
     app, design, rootComp, ui = setup_fusion_workspace()
     exportMgr = adsk.fusion.ExportManager.cast(design.exportManager)
@@ -62,19 +101,23 @@ def rotateOccurence(occ, angle, axis = 2, about = None):
     ax[axis] = 1
     ax = adsk.core.Vector3D.create(ax[0], ax[1], ax[2])
     if about is None:
-        pt = adsk.core.Point3D.create(trl.x, trl.x, trl.x)
+        pt = adsk.core.Point3D.create(trl.x, trl.y, trl.z)
     else:
         pt = adsk.core.Point3D.create(about[0], about[1], about[2])
     transform.setToRotation(angle, ax, pt)
+    transform.translation = trl
     occ.transform = transform
+
+    #rotation_collection = adsk.core.ObjectCollection.create()
+    #rotation_collection.add(occ.component)
+    moveFeature = occ.component.features.moveFeatures
+    moveInput = moveFeature.createInput(occ.component.bRepBodies, occ.transform)
+    moveOperation = moveFeature.add(moveInput)
+
     return occ
 
-def create_gear(name, involute, gear_height, location = None):
-
+def create_cylinder(name, radius, height, location = None):
     app, design, rootComp, ui = setup_fusion_workspace()
-
-    I = involute
-    tooth_start_angle = 0
 
     # create new component
     if location is not None:
@@ -84,27 +127,49 @@ def create_gear(name, involute, gear_height, location = None):
                                                             transform.translation.z + location.z)
         new_component, new_occurence = create_component(rootComp, transform_matrix = transform, name = name)
     else:
-        new_component, new_occurence = create_component(rootComp, name = "Planet1")
+        new_component, new_occurence = create_component(rootComp, name = name)
 
+    # Create Sketch
+    cylinder_sketch = new_component.sketches.add(new_component.xYConstructionPlane)
+    centre_point = adsk.core.Point3D.create(new_occurence.transform.translation.x,
+                                            new_occurence.transform.translation.y,
+                                            new_occurence.transform.translation.z)
+    text_point = adsk.core.Point3D.create(  new_occurence.transform.translation.x + 1.5*radius,
+                                            new_occurence.transform.translation.y + 1.5*radius,
+                                            new_occurence.transform.translation.z)
+    cylinder_circle = cylinder_sketch.sketchCurves.sketchCircles.addByCenterRadius(centre_point, radius)
+    cylinder_sketch.sketchDimensions.addDiameterDimension(cylinder_circle, text_point)
+
+    ext = Extrude(new_component, cylinder_sketch.profiles.item(0), adsk.fusion.FeatureOperations.JoinFeatureOperation, height)
+
+    return new_component, new_occurence
+
+
+def create_gear(name, involute, gear_height, location = None, tooth_start_angle = 0):
+
+    app, design, rootComp, ui = setup_fusion_workspace()
+
+    # create new component
+    new_component, new_occurence = create_component(rootComp, location = location, name = name)
     # Sketch points
+
     gear_profile_sketch = new_component.sketches.add(new_component.xYConstructionPlane)
 
     # create tooth profile for involute 1
-    x1,y1 = I.create_involute1(tooth_start_angle)
+    x1,y1 = involute.create_involute1(tooth_start_angle)
     points = points_from_coordinates(x1, y1)
     gear_profile = gear_profile_sketch.sketchCurves.sketchFittedSplines.add(points)
 
-
     # create tooth profile for involute 2
-    x2,y2 = I.create_involute2(tooth_start_angle)
+    x2,y2 = involute.create_involute2(tooth_start_angle)
     points2 = points_from_coordinates(x2, y2)
     gear_profile2 = gear_profile_sketch.sketchCurves.sketchFittedSplines.add(points2)
 
     # sketch dedendum circle and addendum arc
     circle_centre = adsk.core.Point3D.create(0,0,0)
-    dedendum_circle = gear_profile_sketch.sketchCurves.sketchCircles.addByCenterRadius(circle_centre, I._dedendum_radius)
-    addendum_circle = gear_profile_sketch.sketchCurves.sketchArcs.addByCenterStartSweep(circle_centre, points[-1], I._addendum_end_angle - I._addendum_start_angle + tooth_start_angle)
-    pitch_circle = gear_profile_sketch.sketchCurves.sketchCircles.addByCenterRadius(circle_centre, I._pitch_radius)
+    dedendum_circle = gear_profile_sketch.sketchCurves.sketchCircles.addByCenterRadius(circle_centre, involute._dedendum_radius)
+    addendum_circle = gear_profile_sketch.sketchCurves.sketchArcs.addByCenterStartSweep(circle_centre, points[-1], involute._addendum_end_angle - involute._addendum_start_angle + tooth_start_angle)
+    pitch_circle = gear_profile_sketch.sketchCurves.sketchCircles.addByCenterRadius(circle_centre, involute._pitch_radius)
     pitch_circle.isConstruction = True
 
     # constrain points on addendum circle
@@ -112,16 +177,10 @@ def create_gear(name, involute, gear_height, location = None):
     gear_profile_sketch.geometricConstraints.addCoincident(addendum_circle.endSketchPoint, gear_profile2.endSketchPoint)
 
     # Extrude Gear circle
-    extrudes = new_component.features.extrudeFeatures
-    extInput = extrudes.createInput(gear_profile_sketch.profiles.item(0), adsk.fusion.FeatureOperations.JoinFeatureOperation); # create an extrusion using the new feature operation
-    extInput.setDistanceExtent(False, adsk.core.ValueInput.createByReal(gear_height))
-    ext = extrudes.add(extInput)
+    ext = Extrude(new_component, gear_profile_sketch.profiles.item(0), adsk.fusion.FeatureOperations.JoinFeatureOperation, gear_height)
 
     # Extrude gear tooth
-    extrudes2 = new_component.features.extrudeFeatures
-    extInput2 = extrudes2.createInput(gear_profile_sketch.profiles.item(1), adsk.fusion.FeatureOperations.JoinFeatureOperation); # create an extrusion using the new feature operation
-    extInput2.setDistanceExtent(False, adsk.core.ValueInput.createByReal(gear_height))
-    ext2 = extrudes2.add(extInput2)
+    ext2 = Extrude(new_component, gear_profile_sketch.profiles.item(1), adsk.fusion.FeatureOperations.JoinFeatureOperation, gear_height)
 
     # create circular tooth pattern
     pattern = new_component.features.circularPatternFeatures
@@ -129,7 +188,7 @@ def create_gear(name, involute, gear_height, location = None):
     patternInputFeatures = adsk.core.ObjectCollection.create()
     patternInputFeatures.add(ext2)
     patternInput = pattern.createInput(patternInputFeatures, new_component.zConstructionAxis); # create an extrusion using the new feature operation
-    patternInput.quantity = adsk.core.ValueInput.createByReal(I._number_of_teeth)
+    patternInput.quantity = adsk.core.ValueInput.createByReal(involute._number_of_teeth)
     patternInput.totalAngle = adsk.core.ValueInput.createByString("360 deg")
     pattern.isSymmetric = False
 
@@ -164,13 +223,26 @@ def run(context):
         if I._number_of_teeth % 2 == 1:
             angle_to_rotate += pi / I._number_of_teeth
 
-        gear1Comp, gear1Occ = create_gear("Planet1", I, 5, location = adsk.core.Vector3D.create(I.pitch_diameter, 0, 0))
-        gear2Comp, gear2Occ = create_gear("Planet2", I, 5, location = adsk.core.Vector3D.create(0, 0, 0))
+        gear1Comp, gear1Occ = create_gear("Sun", I, 5, location = adsk.core.Vector3D.create(0, 0, 0))
+        gear2Comp, gear2Occ = create_gear("Planet0", I, 5, location = adsk.core.Vector3D.create(I.pitch_diameter, 0, 0), tooth_start_angle = angle_to_rotate)
+        gear3Comp, gear3Occ = create_gear("Planet1", I, 5, location = adsk.core.Vector3D.create(-I.pitch_diameter, 0, 0), tooth_start_angle = angle_to_rotate)
+        gear4Comp, gear4Occ = create_gear("Planet2", I, 5, location = adsk.core.Vector3D.create(0, I.pitch_diameter, 0))
+        gear5Comp, gear5Occ = create_gear("Planet3", I, 5, location = adsk.core.Vector3D.create(0, -I.pitch_diameter, 0))
 
-        gear2Occ = rotateOccurence(gear2Occ, angle_to_rotate)
+        Ring = Involute(pressure_angle, gear_pitch_diameter * 3, gear_module)
+        ring_angle_to_rotate = 0
+        if Ring._number_of_teeth % 2 == 1:
+            ring_angle_to_rotate += pi / Ring._number_of_teeth
+        RingComp, RingOcc = create_gear("RingTool", Ring, 5, location = adsk.core.Vector3D.create(0, 0, 0), tooth_start_angle = ring_angle_to_rotate)
+
+        housingComp, housingOcc = create_cylinder("RingGear", Ring._pitch_radius + 5, gear_height)
+        booleanSubtract(housingComp, RingComp)
 
         export_to_stl(gear1Occ, export_folder)
         export_to_stl(gear2Occ, export_folder)
+        export_to_stl(gear3Occ, export_folder)
+        export_to_stl(gear4Occ, export_folder)
+        export_to_stl(gear5Occ, export_folder)
 
     except Exception as error:
         print("Error: " + str(traceback.format_exc()))
