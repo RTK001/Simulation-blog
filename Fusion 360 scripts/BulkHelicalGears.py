@@ -87,7 +87,20 @@ def create_gear(name, involute, gear_height, location = None, tooth_start_angle 
 
 def run(context):
     try:
-
+        '''
+        Input Parameters:
+         System
+           pressure angle
+           module
+           height
+         Gear
+           pitch_diameter
+           Name
+           Location
+         File
+            SaveAs Location
+            File structure (for multiple files)
+        '''
         export_folder = os.path.dirname(os.path.abspath(__file__))
         export_folder = os.path.join(export_folder, "Saved STL files")
         try:
@@ -95,13 +108,7 @@ def run(context):
         except FileExistsError:
             pass
 
-        # unique things:
-        #   pressure angle
-        #   module
-        #   pitch_diameter
-        #   height
-        #   Name
-        #   Location
+
         pressure_angle = 20
         gear_pitch_diameter = 20
         gear_module = 0.9
