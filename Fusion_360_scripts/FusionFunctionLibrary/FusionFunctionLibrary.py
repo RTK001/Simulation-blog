@@ -72,6 +72,7 @@ def booleanSubtract(targetComp, toolComp):
     return comb
 
 def convert_to_valid_filename(filename):
+    filename = ":".join(filename.split(":")[:-1])
     to_replace = {"@":"",
                 "(": "",
                  ")":"",
