@@ -87,7 +87,7 @@ def create_gear(name, involute, gear_height, location = None, tooth_start_angle 
     return new_component, new_occurence
 
 
-def create_stl_from_json(parsed_json):
+def create_stl_from_json(parsed_json, delete_after_export = True):
     export_folder = parsed_json["babylon_path"]
     try:
         os.mkdir(export_folder)
@@ -113,10 +113,14 @@ def create_stl_from_json(parsed_json):
         if component["name"] == "Ring":
             housingComp, housingOcc = create_cylinder("RingGear", I._pitch_radius + 5, parsed_json["height"])
             booleanSubtract(housingComp, component_list[-1])
-            component_list[-1] = housingComp
-            occurrence_list[-1] = housingOcc
-        print("Hello")
+            component_list.append(housingComp)
+            occurrence_list.append(housingOcc)
+
         export_to_stl(occurrence_list[-1], export_folder)
+
+    if delete_after_export:
+        [occ.deleteMe() for occ in occurrence_list]
+
 
 def run(context):
     try:
@@ -142,47 +146,6 @@ def run(context):
             with open(os.path.join(json_folder, file), "r") as gear_json:
                 loaded_object = json.load(gear_json)
                 create_stl_from_json(loaded_object)
-
-        '''
-        export_folder = os.path.dirname(os.path.abspath(__file__))
-        export_folder = os.path.join(export_folder, "Saved STL files")
-        try:
-            os.mkdir(export_folder)
-        except FileExistsError:
-            pass
-
-
-        pressure_angle = 20
-        gear_pitch_diameter = 20
-        gear_module = 0.9
-        gear_height = 5
-        I = Involute(pressure_angle, gear_pitch_diameter, gear_module)
-
-        angle_to_rotate = 0
-        if I._number_of_teeth % 2 == 1:
-            angle_to_rotate += pi / I._number_of_teeth
-
-        gear1Comp, gear1Occ = create_gear("Sun", I, 5, location = adsk.core.Vector3D.create(0, 0, 0))
-        gear2Comp, gear2Occ = create_gear("Planet0", I, 5, location = adsk.core.Vector3D.create(I.pitch_diameter, 0, 0), tooth_start_angle = angle_to_rotate)
-        gear3Comp, gear3Occ = create_gear("Planet1", I, 5, location = adsk.core.Vector3D.create(-I.pitch_diameter, 0, 0), tooth_start_angle = angle_to_rotate)
-        gear4Comp, gear4Occ = create_gear("Planet2", I, 5, location = adsk.core.Vector3D.create(0, I.pitch_diameter, 0))
-        gear5Comp, gear5Occ = create_gear("Planet3", I, 5, location = adsk.core.Vector3D.create(0, -I.pitch_diameter, 0))
-
-        Ring = Involute(pressure_angle, gear_pitch_diameter * 3, gear_module)
-        ring_angle_to_rotate = 0
-        if Ring._number_of_teeth % 2 == 1:
-            ring_angle_to_rotate += pi / Ring._number_of_teeth
-        RingComp, RingOcc = create_gear("RingTool", Ring, 5, location = adsk.core.Vector3D.create(0, 0, 0), tooth_start_angle = ring_angle_to_rotate)
-
-        housingComp, housingOcc = create_cylinder("RingGear", Ring._pitch_radius + 5, gear_height)
-        booleanSubtract(housingComp, RingComp)
-
-        export_to_stl(gear1Occ, export_folder)
-        export_to_stl(gear2Occ, export_folder)
-        export_to_stl(gear3Occ, export_folder)
-        export_to_stl(gear4Occ, export_folder)
-        export_to_stl(gear5Occ, export_folder)
-        '''
 
 
     except Exception as error:
