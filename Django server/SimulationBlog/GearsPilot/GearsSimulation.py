@@ -32,8 +32,6 @@ for g in gear_filenames:
 
 
 
-
-
 # Remove .stl for just filenames
 for i in range(len(gear_filenames)):
     gear_filenames[i] = gear_filenames[i].replace(".stl", "")

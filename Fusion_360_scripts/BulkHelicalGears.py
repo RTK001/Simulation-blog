@@ -1,8 +1,9 @@
 import adsk.core, adsk.fusion, traceback
 from math import pi
 from .InvoluteScript.involute import Involute
-import os.path
+import os
 from .FusionFunctionLibrary.FusionFunctionLibrary import *
+import json
 
 
 def create_cylinder(name, radius, height, location = None):
@@ -85,6 +86,38 @@ def create_gear(name, involute, gear_height, location = None, tooth_start_angle 
 
     return new_component, new_occurence
 
+
+def create_stl_from_json(parsed_json):
+    export_folder = parsed_json["babylon_path"]
+    try:
+        os.mkdir(export_folder)
+    except FileExistsError:
+        pass
+
+    component_list = []
+    occurrence_list = []
+
+    for component in parsed_json["gears"]:
+        component = parsed_json["gears"][component]
+        I = Involute(component["_pressure_angle"], component["diameter"], component["_module"])
+
+        angle_to_rotate = 0
+        if I._number_of_teeth % 2 == 1:
+            angle_to_rotate += pi/I._number_of_teeth
+
+        loc = adsk.core.Vector3D.create( component["location"][0], component["location"][1], component["location"][2])
+        comp, occ = create_gear(component["name"], I, parsed_json["height"], location = loc, tooth_start_angle = angle_to_rotate)
+        component_list.append(comp)
+        occurrence_list.append(occ)
+
+        if component["name"] == "Ring":
+            housingComp, housingOcc = create_cylinder("RingGear", I._pitch_radius + 5, parsed_json["height"])
+            booleanSubtract(housingComp, component_list[-1])
+            component_list[-1] = housingComp
+            occurrence_list[-1] = housingOcc
+        print("Hello")
+        export_to_stl(occurrence_list[-1], export_folder)
+
 def run(context):
     try:
         '''
@@ -100,6 +133,16 @@ def run(context):
          File
             SaveAs Location
             File structure (for multiple files)
+        '''
+
+        json_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Gearbox_Json_files")
+        json_files = os.listdir(json_folder)
+
+        for file in json_files:
+            with open(os.path.join(json_folder, file), "r") as gear_json:
+                loaded_object = json.load(gear_json)
+                create_stl_from_json(loaded_object)
+
         '''
         export_folder = os.path.dirname(os.path.abspath(__file__))
         export_folder = os.path.join(export_folder, "Saved STL files")
@@ -139,6 +182,8 @@ def run(context):
         export_to_stl(gear3Occ, export_folder)
         export_to_stl(gear4Occ, export_folder)
         export_to_stl(gear5Occ, export_folder)
+        '''
+
 
     except Exception as error:
         print("Error: " + str(traceback.format_exc()))
