@@ -1,4 +1,8 @@
-function rotateAnimation(mesh, axis) {
+function rotateAnimation(mesh, axis, JSON_File) {
+
+  let gear = JSON_File["gears"][mesh.name]
+  console.log(mesh.name);
+  console.log(gear);
   var rotationAnimation = new BABYLON.Animation("animationOne", "rotation.y", 10, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_RELATIVE);
   var translationAnimation = new BABYLON.Animation("animationOne", "position", 10, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_RELATIVE);
 
@@ -39,10 +43,11 @@ function rotateAnimation(mesh, axis) {
   rotationAnimation.setKeys(rotationKeys);
   mesh.animations.push(rotationAnimation);
 
-  translationAnimation.setKeys(translationKeys);
-  mesh.animations.push(translationAnimation);
+  //translationAnimation.setKeys(translationKeys);
+  //mesh.animations.push(translationAnimation);
 
-  scene.beginDirectAnimation(mesh, [rotationAnimation, translationAnimation], 0, 100, true);
+  //scene.beginDirectAnimation(mesh, [rotationAnimation, translationAnimation], 0, 100, true);
+  scene.beginDirectAnimation(mesh, [rotationAnimation], 0, 100, true);
 
 }
 

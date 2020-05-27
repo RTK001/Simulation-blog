@@ -15,7 +15,7 @@
             }
 
             #renderCanvas {
-                width: 100%;
+                width: 75%;
                 height: 60%;
                 touch-action: none;
             }
@@ -35,7 +35,7 @@
 
    <body>
     <canvas id="renderCanvas" touch-action="none" onDrop = "dropHandler(event);"></canvas>
-    <div id="tester" style = "width:100%;height:40%;"> </div>
+    <div id="tester" style = "width:75%;height:40%;"> </div>
 
 
 
@@ -75,12 +75,19 @@
             var light1 = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(1, 1, 0), scene);
             var light2 = new BABYLON.PointLight("light2", new BABYLON.Vector3(0, 1, -1), scene);
 
-            // Add and manipulate meshes in the scene
-            // var sphere = BABYLON.MeshBuilder.CreateSphere("sphere", {diameter:2}, scene);
-            //var cube = BABYLON.MeshBuilder.CreateBox("box",{size:2}, scene );
+
+            //let json_file = "./static/GearsPilot/Gear2-files.json"
+            let json_file = "./static/GEarsPilot/Sun_20_Planet_20/Sun_20_Planet_20.json"
+
+            awaitLoadJSON(scene, json_file, Gears);
+            //console.log(Gears);
+
 
             var pointsArray = [[0,0,0],
-                               [0,20,0]];
+                               [0,1,1],
+                               [0,2,2],
+                               [0,3,3],
+                               [0,4,4]];
             var vecArray = [];
             var i = 0;
             for (let arr of pointsArray) {
@@ -91,15 +98,12 @@
 
             var line = BABYLON.MeshBuilder.CreateLines("line", {points: vecArray}, scene);
 
-
-            awaitLoadJSON(scene, Gears);
-            //console.log(Gears);
-
+            /*
             for (let g = 0; g < Gears.length; g++) {
               Gears[g].setPivotPoint(new BABYLON.Vector3(26.661191,0,21.86734974), BABYLON.Space.WORLD);
               console.log(Gears[g].getPivotPoint());
             }
-
+*/
 
             var advancedTexture = new BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("ui1");
 

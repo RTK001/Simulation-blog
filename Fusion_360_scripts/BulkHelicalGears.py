@@ -10,23 +10,13 @@ def create_cylinder(name, radius, height, location = None):
     app, design, rootComp, ui = setup_fusion_workspace()
 
     # create new component
-    if location is not None:
-        transform = adsk.core.Matrix3D.create()
-        transform.translation = adsk.core.Vector3D.create(  transform.translation.x + location.x,
-                                                            transform.translation.y + location.y,
-                                                            transform.translation.z + location.z)
-        new_component, new_occurence = create_component(rootComp, transform_matrix = transform, name = name)
-    else:
-        new_component, new_occurence = create_component(rootComp, name = name)
+    new_component, new_occurence = create_component(rootComp, location = location, name = name)
 
     # Create Sketch
     cylinder_sketch = new_component.sketches.add(new_component.xYConstructionPlane)
-    centre_point = adsk.core.Point3D.create(new_occurence.transform.translation.x,
-                                            new_occurence.transform.translation.y,
-                                            new_occurence.transform.translation.z)
-    text_point = adsk.core.Point3D.create(  new_occurence.transform.translation.x + 1.5*radius,
-                                            new_occurence.transform.translation.y + 1.5*radius,
-                                            new_occurence.transform.translation.z)
+
+    centre_point = adsk.core.Point3D.create(0,0,0)
+    text_point = adsk.core.Point3D.create(1.5*radius, 1.5*radius, 0)
     cylinder_circle = cylinder_sketch.sketchCurves.sketchCircles.addByCenterRadius(centre_point, radius)
     cylinder_sketch.sketchDimensions.addDiameterDimension(cylinder_circle, text_point)
 
@@ -96,6 +86,7 @@ def create_stl_from_json(parsed_json, delete_after_export = True):
 
     component_list = []
     occurrence_list = []
+    tool_occurrences = [] # saved to ensure good cleanup
 
     for component in parsed_json["gears"]:
         component = parsed_json["gears"][component]
@@ -106,20 +97,26 @@ def create_stl_from_json(parsed_json, delete_after_export = True):
             angle_to_rotate += pi/I._number_of_teeth
 
         loc = adsk.core.Vector3D.create( component["location"][0], component["location"][1], component["location"][2])
-        comp, occ = create_gear(component["name"], I, parsed_json["height"], location = loc, tooth_start_angle = angle_to_rotate)
-        component_list.append(comp)
-        occurrence_list.append(occ)
-
         if component["name"] == "Ring":
-            housingComp, housingOcc = create_cylinder("RingGear", I._pitch_radius + 5, parsed_json["height"])
-            booleanSubtract(housingComp, component_list[-1])
+            comp, occ = create_gear("Ring_Tool", I, parsed_json["height"], location = loc, tooth_start_angle = angle_to_rotate)
+            housingComp, housingOcc = create_cylinder("Ring", I._pitch_radius + 5, parsed_json["height"], location = loc)
+            booleanSubtract(housingComp, comp)
+            tool_occurrences.append(occ)
             component_list.append(housingComp)
             occurrence_list.append(housingOcc)
 
-        export_to_stl(occurrence_list[-1], export_folder)
+        else:
+            comp, occ = create_gear(component["name"], I, parsed_json["height"], location = loc, tooth_start_angle = angle_to_rotate)
+            component_list.append(comp)
+            occurrence_list.append(occ)
+
+
+    for occ in occurrence_list:
+        export_to_stl(occ, export_folder)
 
     if delete_after_export:
-        [occ.deleteMe() for occ in occurrence_list]
+        [occ.deleteMe() for occ in tool_occurrences + occurrence_list]
+
 
 
 def run(context):

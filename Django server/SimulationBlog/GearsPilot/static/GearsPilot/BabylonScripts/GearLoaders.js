@@ -13,33 +13,39 @@
 
 
 async function LoadGearMeshesFromFiles_ImportMesh(scene, Files, Gears) {
-  for (let f of Files) {
-    await BABYLON.SceneLoader.ImportMeshAsync(f, "./static/GearsPilot/Gear2/", f+".stl", scene, function (meshes, particleSystems, skeletons) {
+  for (let g in Files.gears) {
+    let f = Files.gears[g].filename;
+    await BABYLON.SceneLoader.ImportMeshAsync(g, "./static/GearsPilot/" + Files.name + "/", f, scene, function (meshes, particleSystems, skeletons) {
       //meshes[0].name = f;
       //Gears.push(meshes[0]);
     });
     let gear = scene.meshes[scene.meshes.length -1];
-    gear.setPivotPoint(new BABYLON.Vector3(26.661191,0,21.86734974), BABYLON.Space.WORLD);
-    console.log(gear.getPivotPoint());
+    gear.name = g
+    let loc = Files.gears[g]["location"];
+    console.log(Files["x_offset"])
+    let x = (loc[0] - Files["x_offset"]) * 10
+    let y = (loc[2]) * 10
+    let z = (loc[1] - Files["y_offset"]) * 10
+    gear.position = new BABYLON.Vector3(x, y, z);
+    //gear.setPivotPoint(new BABYLON.Vector3(26.661191,0,21.86734974), BABYLON.Space.WORLD);
+
     Gears.push(gear);
     }
   //AddGearRotations(Gears);
   for (let i = 0; i < Gears.length; i++) {
-    rotateAnimation(Gears[i], new BABYLON.Vector3(0,0,0));
+    rotateAnimation(Gears[i], new BABYLON.Vector3(0,0,0), Files);
 }
 }
 
 
-async function awaitLoadJSON(scene, Gears) {
+async function awaitLoadJSON(scene, fileListURL, Gears) {
   // Loads the .stl filenames from the JSON
   var Files = [];
   // URL for JSON file. Should abstract this.
-  let fileListURL = "./static/GearsPilot/Gear2-files.json";
 
   let prom = await fetch(fileListURL);
   Files = await prom.json();
   LoadGearMeshesFromFiles_ImportMesh(scene, Files, Gears);
-
   }
 
 

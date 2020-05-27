@@ -68,6 +68,8 @@ def booleanSubtract(targetComp, toolComp):
         toolBodies.add(toolComp.bRepBodies.item(i))
     combInput = combines.createInput(targetComp.bRepBodies.item(0), toolBodies)
     combInput.operation = adsk.fusion.FeatureOperations.CutFeatureOperation
+    combInput.isKeepToolBodies = False
+    #print(str(dir(combInput)))
     comb = combines.add(combInput)
     return comb
 

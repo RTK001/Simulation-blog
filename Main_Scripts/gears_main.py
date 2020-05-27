@@ -34,6 +34,7 @@ class Gear():
         # Easily instantiates properties, as defined in class properties. Can also accept any as a keyword argument.
         self.name = name
         self.diameter = diameter
+        self.filename = name + ".stl"
 
         self._pressure_angle = assembly.pressure_angle
         self._module = assembly.module
@@ -56,13 +57,6 @@ class Assembly():
     babylon_folder = os.path.join(os.path.abspath(base_dir),"Django server", "SimulationBlog", "GearsPilot", "static", "GearsPilot")
     fusion_folder = os.path.join(os.path.abspath(base_dir),"Fusion_360_scripts", "Gearbox_Json_files")
 
-
-    # replace with more abstract sin/cos formula?
-    planet_locations = [[1, 0, 0],
-                        [-1, 0, 0],
-                        [0, 1, 0],
-                        [0, -1, 0]]
-
     def __init__(self, pressure_angle, sun_diameter, planet_diameter, module, height, name = None):
         # Easily instantiates properties, as defined in class properties. Can also accept any as a keyword argument.
         self.pressure_angle = pressure_angle
@@ -71,7 +65,24 @@ class Assembly():
         self.module = module
         self.height = height
         self.name = name
+
+        self.x_offset = self.sun_diameter + 2*self.planet_diameter
+        self.y_offset = self.x_offset
+
         self.setup_dir()
+        self.calculate_planet_locations()
+
+    def calculate_planet_locations(self):
+        number_of_planets = 4
+        # x and y offsets, to keep stl coordinates positive, as babylon doesn't support negative .stl coordinates
+        dist = (self.sun_diameter + self.planet_diameter)/2
+        x = lambda i: dist * np.cos(i * 2 * np.pi / number_of_planets) + self.x_offset
+        y = lambda i: dist * np.sin(i * 2 * np.pi / number_of_planets) + self.y_offset
+        self.planet_locations = []
+        for i in range(number_of_planets):
+            self.planet_locations.append([x(i), y(i), 0])
+        print(self.planet_locations)
+
 
     def create(self):
         '''
@@ -83,13 +94,15 @@ class Assembly():
         # Create Sun
         self.gears["Sun"] = Gear(   name = "Sun",
                                     diameter= self.sun_diameter,
-                                    assembly = self)
+                                    assembly = self,
+                                    location = [self.x_offset, self.y_offset, 0])
 
         # Create Ring
         self.gears["Ring"] = Gear(  name = "Ring",
                                     diameter = self.sun_diameter + 2*self.planet_diameter,
                                     assembly = self,
-                                    gear_ratio_to_sun = 0)
+                                    gear_ratio_to_sun = 0,
+                                    location = [self.x_offset, self.y_offset, 0])
 
         # Create Planets
         sun_planet_distance = (self.sun_diameter + self.planet_diameter)/2
@@ -98,7 +111,7 @@ class Assembly():
             self.gears[name] = Gear(    name = name,
                                         diameter = self.planet_diameter,
                                         assembly = self,
-                                        location = [sun_planet_distance * ax for ax in Assembly.planet_locations[i]],
+                                        location = self.planet_locations[i],
                                         gear_ratio_to_sun = self.planet_diameter /  self.sun_diameter)
 
     def setup_dir(self):
