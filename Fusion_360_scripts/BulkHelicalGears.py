@@ -12,6 +12,10 @@ def create_cylinder(name, radius, height, location = None):
     # create new component
     new_component, new_occurence = create_component(rootComp, location = location, name = name)
 
+    # convert from cm to mm.
+    radius = radius/10
+    height = height/10
+
     # Create Sketch
     cylinder_sketch = new_component.sketches.add(new_component.xYConstructionPlane)
 
@@ -47,9 +51,9 @@ def create_gear(name, involute, gear_height, location = None, tooth_start_angle 
 
     # sketch dedendum circle and addendum arc
     circle_centre = adsk.core.Point3D.create(0,0,0)
-    dedendum_circle = gear_profile_sketch.sketchCurves.sketchCircles.addByCenterRadius(circle_centre, involute._dedendum_radius)
+    dedendum_circle = gear_profile_sketch.sketchCurves.sketchCircles.addByCenterRadius(circle_centre, involute._dedendum_radius / 10)
     addendum_circle = gear_profile_sketch.sketchCurves.sketchArcs.addByCenterStartSweep(circle_centre, points[-1], involute._addendum_end_angle - involute._addendum_start_angle + tooth_start_angle)
-    pitch_circle = gear_profile_sketch.sketchCurves.sketchCircles.addByCenterRadius(circle_centre, involute._pitch_radius)
+    pitch_circle = gear_profile_sketch.sketchCurves.sketchCircles.addByCenterRadius(circle_centre, involute._pitch_radius / 10)
     pitch_circle.isConstruction = True
 
     # constrain points on addendum circle
@@ -57,10 +61,10 @@ def create_gear(name, involute, gear_height, location = None, tooth_start_angle 
     gear_profile_sketch.geometricConstraints.addCoincident(addendum_circle.endSketchPoint, gear_profile2.endSketchPoint)
 
     # Extrude Gear circle
-    ext = Extrude(new_component, gear_profile_sketch.profiles.item(0), adsk.fusion.FeatureOperations.JoinFeatureOperation, gear_height)
+    ext = Extrude(new_component, gear_profile_sketch.profiles.item(0), adsk.fusion.FeatureOperations.JoinFeatureOperation, gear_height / 10)
 
     # Extrude gear tooth
-    ext2 = Extrude(new_component, gear_profile_sketch.profiles.item(1), adsk.fusion.FeatureOperations.JoinFeatureOperation, gear_height)
+    ext2 = Extrude(new_component, gear_profile_sketch.profiles.item(1), adsk.fusion.FeatureOperations.JoinFeatureOperation, gear_height / 10)
 
     # create circular tooth pattern
     pattern = new_component.features.circularPatternFeatures

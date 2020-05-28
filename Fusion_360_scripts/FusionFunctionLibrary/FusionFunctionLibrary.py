@@ -15,9 +15,9 @@ def create_component(root_component, location = None, transform_matrix = None,  
 
     if location is not None and transform_matrix is None:
         transform_matrix = adsk.core.Matrix3D.create()
-        transform_matrix.translation = adsk.core.Vector3D.create(   transform_matrix.translation.x + location.x,
-                                                                    transform_matrix.translation.y + location.y,
-                                                                    transform_matrix.translation.z + location.z)
+        transform_matrix.translation = adsk.core.Vector3D.create(   transform_matrix.translation.x + location.x / 10,
+                                                                    transform_matrix.translation.y + location.y / 10,
+                                                                    transform_matrix.translation.z + location.z / 10)
 
     if transform_matrix is None:
         transform_matrix = adsk.core.Matrix3D.create()
@@ -37,7 +37,7 @@ def points_from_coordinates(x, y, z=None):
     if z is None:
         z = [0 for _ in x]
     for i,_ in enumerate(x):
-            points.add(adsk.core.Point3D.create(x[i], y[i], z[i]))
+            points.add(adsk.core.Point3D.create(x[i] / 10, y[i] / 10, z[i] / 10))
     return points
 
 def Extrude(component, profile, type, height):
