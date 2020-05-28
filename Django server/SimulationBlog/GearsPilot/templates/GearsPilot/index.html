@@ -55,6 +55,7 @@
     }
 
       var Gears = [];
+      var ParentPoints = [];
         var canvas = document.getElementById("renderCanvas"); // Get the canvas element
         var engine = new BABYLON.Engine(canvas, true, {
           deterministicLockstep: true,
@@ -77,7 +78,7 @@
 
 
             //let json_file = "./static/GearsPilot/Gear2-files.json"
-            let json_file = "./static/GEarsPilot/Sun_20_Planet_20/Sun_20_Planet_20.json"
+            let json_file = "./static/GearsPilot/Sun_20_Planet_20/Sun_20_Planet_20.json"
 
             awaitLoadJSON(scene, json_file, Gears);
             //console.log(Gears);
@@ -120,6 +121,8 @@
             button1.onPointerUpObservable.add(function() {
             });
             panel.addControl(button1);
+
+            console.log(scene.meshes);
 
             scene.registerBeforeRender(function () {
               if (scene.meshes[5])

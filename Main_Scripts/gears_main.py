@@ -28,6 +28,33 @@ Babylon:
     File structure
 '''
 
+class Animation():
+    animation_variables = {"position": "BABYLON.Animation.ANIMATIONTYPE_VECTOR3",
+                            "position.x": "BABYLON.Animation.ANIMATIONTYPE_FLOAT",
+                            "position.y": "BABYLON.Animation.ANIMATIONTYPE_FLOAT",
+                            "position.z": "BABYLON.Animation.ANIMATIONTYPE_FLOAT",
+                            "rotation.x":"BABYLON.Animation.ANIMATIONTYPE_FLOAT",
+                            "rotation.y":"BABYLON.Animation.ANIMATIONTYPE_FLOAT",
+                            "rotation.z":"BABYLON.Animation.ANIMATIONTYPE_FLOAT",}
+
+    def __init__(self, variable, parent_point = None):
+        '''
+        Animation variables:
+        - Variable animated (rotation, position, etc.)
+        - Speed
+        '''
+        if variable not in Animation.animation_variables:
+            raise KeyError("Variable not animatable in Babylon.js")
+
+        self.variable = variable
+        self.type = Animation.animation_variables[variable]
+        self.keyframes = []
+        if parent_point:
+            self.parent_point = parent_point
+
+    def add_keyframe(self, frame, value):
+        self.keyframes.append({"frame":frame, "value":value})
+
 class Gear():
 
     def __init__(self, name, diameter, assembly, gear_ratio_to_sun = 1, location = [0,0,0]):
@@ -41,6 +68,8 @@ class Gear():
 
         self.location = location
         self.gear_ratio_to_sun = gear_ratio_to_sun
+        self.animations = []
+
         self.calculate_parameters()
 
     def calculate_parameters(self):
@@ -49,6 +78,13 @@ class Gear():
                                         self.diameter,
                                         self._module)
         self.diameter = involute_generator.pitch_diameter
+
+    def add_animations(self):
+        rot = Animation("rotation.y", parent_point = [0,0,0])
+        rot.add_keyframe(0, 0 * self.gear_ratio_to_sun)
+        rot.add_keyframe(50, np.pi * self.gear_ratio_to_sun)
+        rot.add_keyframe(100, 2 * np.pi * self.gear_ratio_to_sun)
+        self.animations.append(rot)
 
 
 class Assembly():
@@ -113,6 +149,7 @@ class Assembly():
                                         assembly = self,
                                         location = self.planet_locations[i],
                                         gear_ratio_to_sun = self.planet_diameter /  self.sun_diameter)
+            self.gears[name].add_animations()
 
     def setup_dir(self):
         # create FolderName
