@@ -3,13 +3,37 @@ import os
 import json
 from math import pi
 
+
 def create_point(name, x=0, y=0, z=0):
     msh = bpy.data.meshes.new(name + "_mesh")
     obj = bpy.data.objects.new(name, msh)
     obj.show_name = True
-    msh.from_pydata([(float(x), float(y), float(z))],[], [])
+    points = msh.from_pydata([(float(x), float(y), float(z))],[], [])
     msh.update()
-    return obj, msh
+    bpy.context.collection.objects.link(obj)
+    return obj
+
+
+def animate_from_list(name, to_animate, prop, lst, interpolation="LINEAR"):
+    ''' dict should contain frame:value pairs'''
+    animation_variables_dict = {"position": ["location", -1],
+                                "position.x" : ["location", 0],
+                                "position.y" : ["location", 2],
+                                "position.z" : ["location", 1],
+                                "rotation": ["rotation_euler", -1],
+                                "rotation.x" : ["rotation_euler", 0],
+                                "rotation.y" : ["rotation_euler", 2],
+                                "rotation.z" : ["rotation_euler", 1],}
+
+    data_path, index = animation_variables_dict[prop]
+
+
+    to_animate.animation_data_create()
+    to_animate.animation_data.action = bpy.data.actions.new(name=name)
+    fcurve = to_animate.animation_data.action.fcurves.new(data_path=data_path, index = index)
+    for frame in lst:
+        keyframe_one = fcurve.keyframe_points.insert(frame=frame["frame"], value=frame["value"])
+        keyframe_one.interpolation = "LINEAR"
 
 
 C = bpy.context
@@ -41,38 +65,28 @@ for name, gear in json_file["gears"].items():
     bpy.data.objects[name].location.y = loc[1] - json_file["y_offset"]
     bpy.data.objects[name].location.z = loc[2]
 
-animation_variables_dict = {"position": "location",
-                            "position.x" : "location.x",
-                            "position.y" : "location.y",
-                            "position.z" : "location.z",
-                            "rotation": "rotation_euler",
-                            "rotation.x" : "rotation_euler.x",
-                            "rotation.y" : "rotation_euler.z",
-                            "rotation.z" : "rotation_euler.y",}
+
+
+
+bpy.context.scene.frame_end = 100
+
+
 
 for name, gear in json_file["gears"].items():
     for ani in gear["animations"]:
-        prop = animation_variables_dict[ani["variable"]]
+
         # if moving relative to a parent point
         if ani["parent_point"]:
             pt = ani["parent_point"]
-            obj, msh = create_point(name+"_parent", pt[0], pt[2], pt[1])
+            obj = create_point(name+"_parent", pt[0], pt[2], pt[1])
             bpy.data.objects[name].parent = obj
-            for frame_data in ani["keyframes"]:
-                exec("bpy.data.objects[name + '_parent']." + prop + " = " + str(frame_data["value"]))
-                data_path = prop.split(".")[0]
-                bpy.data.objects[name+"_parent"].keyframe_insert(data_path=data_path, frame=frame_data["frame"])
-        # If moving on own axes
+            to_animate = obj
         else:
-            for frame_data in ani["keyframes"]:
-                exec("bpy.data.objects[name]." + prop + " = " + str(frame_data["value"]))
-                data_path = prop.split(".")[0]
-                bpy.data.objects[name].keyframe_insert(data_path=data_path, frame=frame_data["frame"])
+            to_animate = bpy.data.objects[name]
+
+        animate_from_list("rotation", to_animate, ani["variable"], ani["keyframes"])
 
 
-'''
-# create animations
-for name, gear in json_file["gears"].items():
-    for ani in gear["animations"]:
-
-'''
+# export to .gltf
+filepath = os.path.join(json_file["babylon_path"], json_file["name"])
+bpy.ops.export_scene.gltf(export_format="GLB", filepath=filepath)
