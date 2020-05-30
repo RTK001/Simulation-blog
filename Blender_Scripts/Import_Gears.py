@@ -66,19 +66,15 @@ for name, gear in json_file["gears"].items():
     bpy.data.objects[name].location.z = loc[2]
 
 
-
-
 bpy.context.scene.frame_end = 100
-
 
 
 for name, gear in json_file["gears"].items():
     for ani in gear["animations"]:
-
         # if moving relative to a parent point
-        if ani["parent_point"]:
+        if "parent_point" in ani:
             pt = ani["parent_point"]
-            obj = create_point(name+"_parent", pt[0], pt[2], pt[1])
+            obj = create_point(pt["name"], pt["x"], pt["z"], pt["y"])
             bpy.data.objects[name].parent = obj
             to_animate = obj
         else:

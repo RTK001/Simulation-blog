@@ -4,6 +4,10 @@ sys.path.append(os.path.dirname(os.path.abspath(os.curdir)))
 from Fusion_360_scripts.InvoluteScript.involute import Involute
 import json
 import numpy as np
+import subprocess
+import glob
+from shutil import copyfile
+from time import sleep
 
 
 '''
@@ -55,6 +59,13 @@ class Animation():
     def add_keyframe(self, frame, value):
         self.keyframes.append({"frame":frame, "value":value})
 
+class AnimationPivot():
+    def __init__(self, name, x=0, y=0, z=0):
+        self.name = name
+        self.x = x
+        self.y = y
+        self.z = z
+
 class Gear():
 
     def __init__(self, name, diameter, assembly, gear_ratio_to_sun = 1, location = [0,0,0]):
@@ -79,15 +90,17 @@ class Gear():
                                         self._module)
         self.diameter = involute_generator.pitch_diameter
 
-    def add_animations(self):
-        rot = Animation("rotation.y", parent_point = [0,0,0])
-        rot.add_keyframe(0, 0 * self.gear_ratio_to_sun)
-        rot.add_keyframe(50, np.pi * self.gear_ratio_to_sun)
-        rot.add_keyframe(100, 2 * np.pi * self.gear_ratio_to_sun)
+    def add_rotation(self, speed = None, parent_point = None):
+        if speed is None:
+            speed = self.gear_ratio_to_sun
+        rot = Animation("rotation.y", parent_point = parent_point)
+        rot.add_keyframe(0, 0 * speed)
+        rot.add_keyframe(50, np.pi * speed)
+        rot.add_keyframe(100, 2 * np.pi * speed)
         self.animations.append(rot)
 
 
-class Assembly():
+class Planetary_Gears():
 
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     babylon_folder = os.path.join(os.path.abspath(base_dir),"Django server", "SimulationBlog", "GearsPilot", "static", "GearsPilot")
@@ -98,6 +111,7 @@ class Assembly():
         self.pressure_angle = pressure_angle
         self.sun_diameter = sun_diameter
         self.planet_diameter = planet_diameter
+        self.ring_diameter = self.sun_diameter + 2*self.planet_diameter
         self.module = module
         self.height = height
         self.name = name
@@ -107,6 +121,7 @@ class Assembly():
 
         self.setup_dir()
         self.calculate_planet_locations()
+        self.calculate_speeds()
 
     def calculate_planet_locations(self):
         number_of_planets = 4
@@ -117,8 +132,28 @@ class Assembly():
         self.planet_locations = []
         for i in range(number_of_planets):
             self.planet_locations.append([x(i), y(i), 0])
-        print(self.planet_locations)
 
+    def calculate_speeds(self):
+        ''' calculates all gear rotational velocities '''
+        self.sun_speed = 1.0
+        self.ring_speed = 0.0
+        v_sun = self.sun_diameter * self.sun_speed
+        v_ring = self.ring_diameter * self.ring_speed
+        effective_carrier_diameter = (self.sun_diameter + self.planet_diameter)/2
+
+        self.carrier_speed = (v_sun + v_ring) / (self.sun_diameter + self.ring_diameter)
+        self.planet_speed = (((self.sun_diameter + self.planet_diameter) * self.carrier_speed - v_sun) / self.planet_diameter) - self.carrier_speed
+        #self.planet_speed = (v_ring - (self.ring_diameter - self.planet_diameter) * self.carrier_speed) / self.planet_diameter
+
+        #self.planet_speed = (v_ring - v_sun) / (2 * self.planet_diameter)
+        #self.carrier_speed = (v_sun + self.planet_speed * self.planet_diameter) / effective_carrier_diameter
+
+        print("sun_speed: {0}".format(self.sun_speed))
+        print("ring_speed: {0}".format(self.ring_speed))
+        print("v_sun: {0}".format(v_sun))
+        print("v_ring: {0}".format(v_ring))
+        print("planet_speed: {0}".format(self.planet_speed))
+        print("carrier_speed: {0}".format(self.carrier_speed))
 
     def create(self):
         '''
@@ -132,15 +167,18 @@ class Assembly():
                                     diameter= self.sun_diameter,
                                     assembly = self,
                                     location = [self.x_offset, self.y_offset, 0])
+        self.gears["Sun"].add_rotation()
 
         # Create Ring
         self.gears["Ring"] = Gear(  name = "Ring",
                                     diameter = self.sun_diameter + 2*self.planet_diameter,
                                     assembly = self,
-                                    gear_ratio_to_sun = 0,
+                                    gear_ratio_to_sun = self.ring_speed,
                                     location = [self.x_offset, self.y_offset, 0])
 
         # Create Planets
+        sun_loc = self.gears["Sun"].location
+        planet_carrier = AnimationPivot("PlanetCarrier", sun_loc[0], sun_loc[1], sun_loc[2])
         sun_planet_distance = (self.sun_diameter + self.planet_diameter)/2
         for i in range(4):
             name =  "Planet" + str(i+1)
@@ -149,19 +187,20 @@ class Assembly():
                                         assembly = self,
                                         location = self.planet_locations[i],
                                         gear_ratio_to_sun = self.planet_diameter /  self.sun_diameter)
-            self.gears[name].add_animations()
+            self.gears[name].add_rotation(speed = self.planet_speed)
+            self.gears[name].add_rotation(speed = self.carrier_speed, parent_point = planet_carrier)
 
     def setup_dir(self):
         # create FolderName
         if self.name is None:
             self.name = "Sun_" + str(self.sun_diameter) + "_Planet_" + str(self.planet_diameter)
 
-        self.babylon_path = os.path.join(Assembly.babylon_folder, self.name)
+        self.babylon_path = os.path.join(Planetary_Gears.babylon_folder, self.name)
         if not os.path.exists(self.babylon_path):
             os.mkdir(self.babylon_path)
 
 
-        self.fusion_path = Assembly.fusion_folder
+        self.fusion_path = Planetary_Gears.fusion_folder
         self.filename = self.name + ".json"
 
 
@@ -172,6 +211,24 @@ class Assembly():
 
 
 
-a = Assembly(pressure_angle=20, sun_diameter=20, planet_diameter=20, module=1, height=5)
+a = Planetary_Gears(pressure_angle=20, sun_diameter=20, planet_diameter=20, module=1, height=5)
 a.create()
 a.save_json()
+
+
+# Run Fusion 360
+fusion360_run_path = r"C:\Users\rishi\AppData\Local\Autodesk\webdeploy\production"
+launchers = glob.glob(os.path.join(fusion360_run_path, "*", "FusionLauncher.exe"))
+#prc = subprocess.run(launchers[-1]) # will block until program closed
+
+
+# Run blender script
+base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+blender_script_path = os.path.join(base_dir, "Blender_Scripts")
+file = os.listdir(blender_script_path)[0];
+dst = r"D:\Blender_Tests"
+copyfile(os.path.join(blender_script_path, file), os.path.join(dst, file))
+subprocess.run(r"D:\Program Files\blender --background --python " + os.path.join(dst, file))
+sleep(10)
+
+os.remove(os.path.join(dst, file))
