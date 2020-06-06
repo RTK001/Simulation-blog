@@ -49,6 +49,7 @@
       {
         margin : {t:0}
       });
+    var time = 0;
 
     function addToGraph(x_data, y_data, traces) {
       Plotly.extendTraces("tester", {x:[[x_data]], y:[[y_data]]}, traces);
@@ -60,7 +61,7 @@
         var engine = new BABYLON.Engine(canvas, true, {
           deterministicLockstep: true,
           lockstepMaxSteps: 4}); // Generate the BABYLON 3D engine
-        var time = 0;
+
 
         /******* Add the create scene function ******/
         var createScene = function () {

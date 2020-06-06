@@ -41,7 +41,7 @@ class Animation():
                             "rotation.y":"BABYLON.Animation.ANIMATIONTYPE_FLOAT",
                             "rotation.z":"BABYLON.Animation.ANIMATIONTYPE_FLOAT",}
 
-    def __init__(self, variable, parent_point = None):
+    def __init__(self, name, variable, parent_point = None):
         '''
         Animation variables:
         - Variable animated (rotation, position, etc.)
@@ -50,6 +50,7 @@ class Animation():
         if variable not in Animation.animation_variables:
             raise KeyError("Variable not animatable in Babylon.js")
 
+        self.name = name
         self.variable = variable
         self.type = Animation.animation_variables[variable]
         self.keyframes = []
@@ -90,10 +91,10 @@ class Gear():
                                         self._module)
         self.diameter = involute_generator.pitch_diameter
 
-    def add_rotation(self, speed = None, parent_point = None):
+    def add_rotation(self, name, speed = None, parent_point = None):
         if speed is None:
             speed = self.gear_ratio_to_sun
-        rot = Animation("rotation.y", parent_point = parent_point)
+        rot = Animation(name, "rotation.y", parent_point = parent_point)
         rot.add_keyframe(0, 0 * speed)
         rot.add_keyframe(50, np.pi * speed)
         rot.add_keyframe(100, 2 * np.pi * speed)
@@ -122,6 +123,8 @@ class Planetary_Gears():
         self.setup_dir()
         self.calculate_planet_locations()
         self.calculate_speeds()
+        for name, val in self.__dict__.items():
+            print(name + ": {}".format(val))
 
     def calculate_planet_locations(self):
         number_of_planets = 4
@@ -135,25 +138,34 @@ class Planetary_Gears():
 
     def calculate_speeds(self):
         ''' calculates all gear rotational velocities '''
-        self.sun_speed = 1.0
-        self.ring_speed = 0.0
-        v_sun = self.sun_diameter * self.sun_speed
-        v_ring = self.ring_diameter * self.ring_speed
+        self.boundary_conditions = ["FixedRing", "FixedSun"]
+        self.sun_speed = np.array([1.0, 0.0])
+        self.ring_speed = np.array([0.0, 1.0])
         effective_carrier_diameter = (self.sun_diameter + self.planet_diameter)/2
 
+        v_sun = self.sun_diameter * self.sun_speed
+        v_ring = self.ring_diameter * self.ring_speed
+        
         self.carrier_speed = (v_sun + v_ring) / (self.sun_diameter + self.ring_diameter)
-        self.planet_speed = (((self.sun_diameter + self.planet_diameter) * self.carrier_speed - v_sun) / self.planet_diameter) - self.carrier_speed
-        #self.planet_speed = (v_ring - (self.ring_diameter - self.planet_diameter) * self.carrier_speed) / self.planet_diameter
+        self.planet_speed = (((self.sun_diameter + self.planet_diameter) * self.carrier_speed - v_sun) / self.planet_diameter)
 
-        #self.planet_speed = (v_ring - v_sun) / (2 * self.planet_diameter)
-        #self.carrier_speed = (v_sun + self.planet_speed * self.planet_diameter) / effective_carrier_diameter
+        for i,_ in enumerate(self.boundary_conditions):
+            speeds = [self.sun_speed[i], self.ring_speed[i], self.carrier_speed[i], self.planet_speed[i]]
+            speeds = [s for s in speeds if s > 0]
+            min_speed = min(speeds)
+            self.sun_speed[i] /= min_speed
+            self.ring_speed[i] /= min_speed
+            self.carrier_speed[i] /= min_speed
+            self.planet_speed[i] /= min_speed
 
-        print("sun_speed: {0}".format(self.sun_speed))
-        print("ring_speed: {0}".format(self.ring_speed))
-        print("v_sun: {0}".format(v_sun))
-        print("v_ring: {0}".format(v_ring))
-        print("planet_speed: {0}".format(self.planet_speed))
-        print("carrier_speed: {0}".format(self.carrier_speed))
+        self.planet_speed -= self.carrier_speed # correct for rotations induced by parent relationship
+
+        # convert back to lists for other operations
+        self.sun_speed = self.sun_speed.tolist()
+        self.ring_speed = self.ring_speed.tolist()
+        self.carrier_speed = self.carrier_speed.tolist()
+        self.planet_speed = self.planet_speed.tolist()
+
 
     def create(self):
         '''
@@ -161,25 +173,32 @@ class Planetary_Gears():
         Will prepare the
         '''
         self.gears = {} # clear any previous gears
+        self.carriers = {}
 
         # Create Sun
         self.gears["Sun"] = Gear(   name = "Sun",
                                     diameter= self.sun_diameter,
                                     assembly = self,
                                     location = [self.x_offset, self.y_offset, 0])
-        self.gears["Sun"].add_rotation()
+        for i, condition in enumerate(self.boundary_conditions):
+            self.gears["Sun"].add_rotation(condition, speed = self.sun_speed[i])
 
         # Create Ring
         self.gears["Ring"] = Gear(  name = "Ring",
                                     diameter = self.sun_diameter + 2*self.planet_diameter,
                                     assembly = self,
-                                    gear_ratio_to_sun = self.ring_speed,
+                                    gear_ratio_to_sun = self.ring_speed[0],
                                     location = [self.x_offset, self.y_offset, 0])
+        for i, condition in enumerate(self.boundary_conditions):
+            self.gears["Ring"].add_rotation(condition, speed = self.ring_speed[i])
 
         # Create Planets
         sun_loc = self.gears["Sun"].location
-        planet_carrier = AnimationPivot("PlanetCarrier", sun_loc[0], sun_loc[1], sun_loc[2])
+
+
         sun_planet_distance = (self.sun_diameter + self.planet_diameter)/2
+        self.carriers["PlanetCarrier"] = AnimationPivot("PlanetCarrierAnim", sun_loc[0], sun_loc[1], sun_loc[2])
+
         for i in range(4):
             name =  "Planet" + str(i+1)
             self.gears[name] = Gear(    name = name,
@@ -187,8 +206,11 @@ class Planetary_Gears():
                                         assembly = self,
                                         location = self.planet_locations[i],
                                         gear_ratio_to_sun = self.planet_diameter /  self.sun_diameter)
-            self.gears[name].add_rotation(speed = self.planet_speed)
-            self.gears[name].add_rotation(speed = self.carrier_speed, parent_point = planet_carrier)
+
+            for i, condition in enumerate(self.boundary_conditions):
+                self.gears[name].add_rotation(condition, speed = self.planet_speed[i])
+                self.gears[name].add_rotation(condition, speed = self.carrier_speed[i], parent_point = self.carriers["PlanetCarrier"])
+
 
     def setup_dir(self):
         # create FolderName
@@ -225,10 +247,5 @@ launchers = glob.glob(os.path.join(fusion360_run_path, "*", "FusionLauncher.exe"
 # Run blender script
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 blender_script_path = os.path.join(base_dir, "Blender_Scripts")
-file = os.listdir(blender_script_path)[0];
-dst = r"D:\Blender_Tests"
-copyfile(os.path.join(blender_script_path, file), os.path.join(dst, file))
-subprocess.run(r"D:\Program Files\blender --background --python " + os.path.join(dst, file))
-sleep(10)
-
-os.remove(os.path.join(dst, file))
+file = "Import_Gears.py"
+subprocess.run(r'D:\Program Files\blender --python "{}"'.format(os.path.join(blender_script_path, file)))

@@ -21,12 +21,13 @@
         </style>
 
         {% load static %}
-
+        <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
         <script src="https://preview.babylonjs.com/babylon.js"></script>
         <script src="https://preview.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
         <script src="https://preview.babylonjs.com/gui/babylon.gui.js"></script>
         <script src="https://code.jquery.com/pep/0.4.3/pep.js"></script>
+        <script src="{% static 'GearsPilot/BabylonScripts/GUIFunctions.js' %}"> </script>
 
     </head>
 
@@ -35,6 +36,19 @@
     <div id="tester" style = "width:75%;height:40%;"> </div>
 
     <script>
+
+      Tester = document.getElementById("tester");
+      var plt = Plotly.newPlot( Tester, [{
+        x: [0],
+        y: [0],}, {x:[0], y:[0]}],
+        {
+          margin : {t:0}
+        });
+      var time = 0;
+
+      function addToGraph(x_data, y_data, traces) {
+        Plotly.extendTraces("tester", {x:[[x_data]], y:[[y_data]]}, traces);
+      }
 
       var canvas = document.getElementById("renderCanvas"); // Get the canvas element
       var engine = new BABYLON.Engine(canvas);
@@ -52,14 +66,84 @@
 
         let importFile = "./static/GearsPilot/Sun_20_Planet_20/Sun_20_Planet_20.glb";
 
-        BABYLON.SceneLoader.Append("./static/GearsPilot/Sun_20_Planet_20/", "Sun_20_Planet_20.glb", scene, function (scene) {
-        console.log(scene.animationGroups);
-        for (let animation_group of scene.animationGroups)
-        {
-            animation_group.play(true);
-        }
+        var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+
+        var panel = new BABYLON.GUI.StackPanel();
+        panel.width = "220px";
+        panel.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+        panel.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_CENTER;
+        advancedTexture.addControl(panel);
+
+        let initialSliderValue = 1;
+        let headerText = "Speed: ";
+
+        var header = new BABYLON.GUI.TextBlock();
+        header.text = headerText + Math.round(initialSliderValue*10)/10
+        header.height = "20px";
+        header.color = "white";
+        panel.addControl(header);
+
+        var slider = new BABYLON.GUI.Slider();
+        slider.minimum = 0;
+        slider.maximum = 10;
+        slider.value = 1;
+        slider.height = "20px";
+        slider.width = "200px";
+        slider.onValueChangedObservable.add(function(value) {
+          header.text = headerText + Math.round(value*10)/10;
+          for (let animation_group of scene.animationGroups)
+          {
+            if (animation_group.isPlaying)
+            {
+                animation_group.speedRatio = value;
+                animation_group.play(true);
+            }
+          }
         });
 
+        panel.addControl(slider);
+
+        BABYLON.SceneLoader.Append("./static/GearsPilot/Sun_20_Planet_20/", "Sun_20_Planet_20.glb", scene, function (scene) {
+        scene.stopAllAnimations();
+        var FixedRing = new BABYLON.AnimationGroup("FixedRing");
+        var FixedSun = new BABYLON.AnimationGroup("FixedSun");
+
+        for (let animation_group of scene.animationGroups)
+        {
+          if (animation_group.name.includes("FixedRing"))
+          {
+              FixedRing.addTargetedAnimation(animation_group.targetedAnimations[0].animation, animation_group.targetedAnimations[0].target);
+              FixedRing.setWeightForAllAnimatables(1);
+              FixedRing.play(true);
+            }
+          else if (animation_group.name.includes("FixedSun"))
+            {
+              FixedSun.addTargetedAnimation(animation_group.targetedAnimations[0].animation, animation_group.targetedAnimations[0].target);
+              FixedSun.setWeightForAllAnimatables(0);
+            }
+
+        }
+        scene.animationGroups.splice(0,scene.animationGroups.length -2);
+        createWeightingRadioButtons(FixedRing, panel);
+        createWeightingRadioButtons(FixedSun, panel);
+
+        });
+
+
+        scene.registerBeforeRender(function () {
+          if (scene.meshes[5])
+          { let pos = scene.meshes[5].absolutePosition;
+            /*
+            pos.x = Math.round(pos.x * 10) / 10;
+            pos.y = Math.round(pos.y * 10) / 10;
+            pos.z = Math.round(pos.z * 10) / 10;
+            */
+            time += engine.getDeltaTime()/1000;
+            Plotly.extendTraces("tester", {x:[[time], [time]], y:[[pos.x], [pos.z]]}, [0,1], 200);
+
+          }
+
+        });
 
         return scene;
       }
