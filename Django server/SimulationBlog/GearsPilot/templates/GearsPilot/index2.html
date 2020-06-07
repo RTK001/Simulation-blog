@@ -53,58 +53,19 @@
       var canvas = document.getElementById("renderCanvas"); // Get the canvas element
       var engine = new BABYLON.Engine(canvas);
 
-      var createScene = function() {
+      function importJsonMeshes(scene, panel, sunTeeth, PlanetTeeth)
+      {
 
-        var scene = new BABYLON.Scene(engine);
-        // Add a camera to the scene and attach it to the canvas
-        var camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 2, 0.6 * Math.PI / 2, 2, new BABYLON.Vector3(0,80,90), scene);
-        camera.attachControl(canvas, true);
+        let base_address = "./static/GearsPilot/Sun_" + String(sunTeeth) + "_Planet_"+ String(PlanetTeeth) +"/";
+        let filename = "Sun_" + String(sunTeeth) + "_Planet_" + String(PlanetTeeth) + ".glb";
 
-        // Add lights to the scene
-        var light1 = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(1, 1, 0), scene);
-        var light2 = new BABYLON.PointLight("light2", new BABYLON.Vector3(0, 1, -1), scene);
-
-        let importFile = "./static/GearsPilot/Sun_20_Planet_20/Sun_20_Planet_20.glb";
-
-        var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
-
-        var panel = new BABYLON.GUI.StackPanel();
-        panel.width = "220px";
-        panel.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
-        panel.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_CENTER;
-        advancedTexture.addControl(panel);
-
-        let initialSliderValue = 1;
-        let headerText = "Speed: ";
-
-        var header = new BABYLON.GUI.TextBlock();
-        header.text = headerText + Math.round(initialSliderValue*10)/10
-        header.height = "20px";
-        header.color = "white";
-        panel.addControl(header);
-
-        var slider = new BABYLON.GUI.Slider();
-        slider.minimum = 0;
-        slider.maximum = 10;
-        slider.value = 1;
-        slider.height = "20px";
-        slider.width = "200px";
-        slider.onValueChangedObservable.add(function(value) {
-          header.text = headerText + Math.round(value*10)/10;
-          for (let animation_group of scene.animationGroups)
-          {
-            if (animation_group.isPlaying)
-            {
-                animation_group.speedRatio = value;
-                animation_group.play(true);
-            }
-          }
-        });
-
-        panel.addControl(slider);
-
-        BABYLON.SceneLoader.Append("./static/GearsPilot/Sun_20_Planet_20/", "Sun_20_Planet_20.glb", scene, function (scene) {
+        for (let i = 1; i < scene.meshes.length; i++)
+        {
+          scene.meshes[i].dispose();
+        }
+        BABYLON.SceneLoader.Append(base_address, filename, scene, function (scene) {
         scene.stopAllAnimations();
+
         var FixedRing = new BABYLON.AnimationGroup("FixedRing");
         var FixedSun = new BABYLON.AnimationGroup("FixedSun");
 
@@ -123,12 +84,49 @@
             }
 
         }
+
         scene.animationGroups.splice(0,scene.animationGroups.length -2);
+
         createWeightingRadioButtons(FixedRing, panel);
         createWeightingRadioButtons(FixedSun, panel);
 
         });
+      }
 
+
+      var createScene = function() {
+
+        var scene = new BABYLON.Scene(engine);
+        // Add a camera to the scene and attach it to the canvas
+        var camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 2, 0.6 * Math.PI / 2, 2, new BABYLON.Vector3(0,80,90), scene);
+        camera.setTarget(BABYLON.Vector3.Zero());
+        camera.attachControl(canvas, true);
+        scene.activeCamera.panningSensibility = 50;
+
+        // Add lights to the scene
+        var light1 = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(1, 1, 0), scene);
+        var light2 = new BABYLON.PointLight("light2", new BABYLON.Vector3(0, 1, -1), scene);
+
+        var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+
+        var panel = new BABYLON.GUI.StackPanel();
+        panel.width = "220px";
+        panel.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+        panel.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_CENTER;
+        advancedTexture.addControl(panel);
+
+        createSlider(panel, "Speed: ", 5, 0, 1,  function(value) {
+          for (let animation_group of scene.animationGroups)
+          {
+            if (animation_group.isPlaying)
+            {
+                animation_group.speedRatio = value;
+                animation_group.play(true);
+            }
+          }
+        });
+
+        importJsonMeshes(scene, panel, 20, 20);
 
         scene.registerBeforeRender(function () {
           if (scene.meshes[5])

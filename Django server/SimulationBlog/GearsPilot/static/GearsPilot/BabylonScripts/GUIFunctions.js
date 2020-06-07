@@ -1,4 +1,36 @@
 
+var sliderHeight = "20px";
+var sliderWidth = "200px";
+var sliderHeaderHeight = sliderHeight;
+var headerColor = "white"
+
+function createSlider(panel, title, maxVal, minVal, initialVal, onChange)
+{
+  // variables for all sliders
+  var sliderHeight = "20px";
+  var sliderWidth = "200px";
+  var sliderHeaderHeight = sliderHeight;
+  var headerColor = "white";
+
+  var header = new BABYLON.GUI.TextBlock();
+  header.text = title + Math.round(initialVal*10)/10
+  header.height = sliderHeaderHeight;
+  header.color = headerColor;
+  panel.addControl(header);
+
+  var slider = new BABYLON.GUI.Slider();
+  slider.minimum = minVal;
+  slider.maximum = maxVal;
+  slider.value = initialVal;
+  slider.height = sliderHeight;
+  slider.width = sliderWidth;
+  slider.onValueChangedObservable.add(function(value) {
+    onChange(value);
+    header.text = title + Math.round(value*10)/10;
+  }
+  );
+  panel.addControl(slider);
+}
 
 function createWeightingControl(group, panel) {
   var header = new BABYLON.GUI.TextBlock();
