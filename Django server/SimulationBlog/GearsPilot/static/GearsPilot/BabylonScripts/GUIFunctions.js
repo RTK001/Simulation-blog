@@ -4,7 +4,7 @@ var sliderWidth = "200px";
 var sliderHeaderHeight = sliderHeight;
 var headerColor = "white"
 
-function createSlider(panel, title, maxVal, minVal, initialVal, onChange)
+function createSlider(panel, title, maxVal, minVal, initialVal, step, onChange)
 {
   // variables for all sliders
   var sliderHeight = "20px";
@@ -19,17 +19,24 @@ function createSlider(panel, title, maxVal, minVal, initialVal, onChange)
   panel.addControl(header);
 
   var slider = new BABYLON.GUI.Slider();
+  let multiplier = maxVal - minVal;
   slider.minimum = minVal;
-  slider.maximum = maxVal;
-  slider.value = initialVal;
+  slider.maximum = minVal + 1;
+  slider.value = (initialVal - minVal) / multiplier;
   slider.height = sliderHeight;
   slider.width = sliderWidth;
+  //slider.step = step  // Babylon.js slider steps only work with step values below 1.
   slider.onValueChangedObservable.add(function(value) {
+    // round
+    value = (value - minVal) * multiplier + minVal;
+    value = Math.round(value / step) * step;
     onChange(value);
     header.text = title + Math.round(value*10)/10;
   }
   );
   panel.addControl(slider);
+
+  return slider;
 }
 
 function createWeightingControl(group, panel) {
@@ -57,15 +64,17 @@ function createWeightingControl(group, panel) {
 	panel.addControl(slider);
 }
 
-function createWeightingRadioButtons(group, panel) {
 
-  var button = new BABYLON.GUI.RadioButton();
+function createWeightingRadioButtons(group, panel) {
+  console.log(group);
+  console.log("error?");
+  var button = new BABYLON.GUI.RadioButton(group.name);
   button.width = "20px";
   button.height = "20px";
   button.color = "white";
   button.background = "green";
-
-  button.onIsCheckedChangedObservable.add(function(state) {
+  button.onIsCheckedChangedObservable.add(function(state)
+  {
       if (state) {
           group.setWeightForAllAnimatables(1);
           group.play(true);

@@ -22,12 +22,13 @@ class GearsJsonLoader():
                                 "rotation.y" : ["rotation_euler", 2],
                                 "rotation.z" : ["rotation_euler", 1],}
 
-    def __init__(self, filepath):
-        self.filepath = filepath
-        self.dirname, self.filename = os.path.split(self.filepath)
-        with open(self.filepath, "r") as f:
+    def __init__(self, json_path):
+        self.json_path = json_path
+        self.dirname, self.filename = os.path.split(self.json_path)
+        with open(self.json_path, "r") as f:
             self.loaded_json = json.load(f)
 
+        self.stl_path = self.loaded_json["babylon_path"]
 
         self.name =  self.loaded_json["name"]
         self.offsets = (self.loaded_json["x_offset"], self.loaded_json["y_offset"], 0)
@@ -45,14 +46,10 @@ class GearsJsonLoader():
         return list(map(temp_sub, loc, self.offsets))
 
     def load_gears(self):
-        '''
-        files = glob.glob(os.path.join(self.dirname, "*.stl"))
-        for file in files:
-            bpy.ops.import_mesh.stl(filepath = os.path.join(pth, file))
-        '''
+
         self.gears_names = [] # reset gear_names
         for gear_name, gear in self.loaded_json["gears"].items():
-            filepath = os.path.join(self.dirname, gear_name + ".stl")
+            filepath = os.path.join(self.stl_path, gear_name + ".stl")
             bpy.ops.import_mesh.stl(filepath = filepath)
             self.gears_names.append(gear_name)
             gear_object = bpy.data.objects[gear_name]
@@ -88,7 +85,7 @@ class GearsJsonLoader():
         # Import each gear
         self.gears_names = [] # reset gear_names
         for gear_name, gear in self.loaded_json["gears"].items():
-            filepath = os.path.join(self.dirname, gear_name + ".stl")
+            filepath = os.path.join(self.stl_path, gear_name + ".stl")
             bpy.ops.import_mesh.stl(filepath = filepath)
             self.gears_names.append(gear_name)
             gear_object = bpy.data.objects[gear_name]
@@ -111,39 +108,46 @@ class GearsJsonLoader():
                 self.armature_manager.add_animation(gear_bone, animation["name"], variable, index, keyframe_list)
 
 
-# specify json
-pth = r"C:\Users\rishi\Google Drive\Simulation blog\Django server\SimulationBlog\GearsPilot\static\GearsPilot\Sun_20_Planet_20"
-files = os.listdir(pth)
-json_file = "Sun_20_Planet_20.json"
 
 remove_cube()
-#a = ArmatureManager("GearsArmature")
-gl = GearsJsonLoader(os.path.join(pth, json_file))
-#gl.load_all_skeleton()
 
 
-gl.load_gears()
-carrier = create_point("Carrier")
-carrier_animated = []
-for name, gear in gl.loaded_json["gears"].items():
-    for animation in gear["animations"]:
-        if "parent_point" in animation:
-            bpy.data.objects[gear["name"]].parent = carrier
-            if animation["name"] in carrier_animated:
-                continue
-            to_animate = carrier
-            carrier_animated.append(animation["name"])
-        else:
-            to_animate = bpy.data.objects[gear["name"]]
+# specify json
+blender_folder = os.path.dirname(os.path.abspath(__file__))
+json_path = os.path.join(blender_folder, "Json_files")
+files = os.listdir(json_path)
 
-        animate_from_list(animation["name"], to_animate, animation["variable"], animation["keyframes"])
+for json_file in files:
+    gl = GearsJsonLoader(os.path.join(json_path, json_file))
+    #gl.load_all_skeleton()
+
+    gl.load_gears()
+    carrier = create_point("Carrier")
+    carrier_animated = []
+    for name, gear in gl.loaded_json["gears"].items():
+        for animation in gear["animations"]:
+            if "parent_point" in animation:
+                bpy.data.objects[gear["name"]].parent = carrier
+                if animation["name"] in carrier_animated:
+                    continue
+                to_animate = carrier
+                carrier_animated.append(animation["name"])
+            else:
+                to_animate = bpy.data.objects[gear["name"]]
+
+            animate_from_list(animation["name"], to_animate, animation["variable"], animation["keyframes"])
 
 
-bpy.context.scene.frame_end = 100
+    bpy.context.scene.frame_end = 100
 
-# export to .gltf
-filepath = os.path.join(gl.loaded_json["babylon_path"], gl.loaded_json["name"])
-bpy.ops.export_scene.gltf(export_format="GLB", filepath=filepath)
+    # export to .gltf
+    filepath = os.path.join(gl.loaded_json["babylon_path"], gl.loaded_json["name"])
+    bpy.ops.export_scene.gltf(export_format="GLB", filepath=filepath)
+
+    # delete everything
+    for object in bpy.data.objects:
+        bpy.data.objects.remove(bpy.data.objects[object.name], do_unlink = True)
+
 
 '''
 # Load each .stl file

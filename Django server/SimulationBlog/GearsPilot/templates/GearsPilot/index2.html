@@ -53,13 +53,15 @@
       var canvas = document.getElementById("renderCanvas"); // Get the canvas element
       var engine = new BABYLON.Engine(canvas);
 
+
+
       function importJsonMeshes(scene, panel, sunTeeth, PlanetTeeth)
       {
-
         let base_address = "./static/GearsPilot/Sun_" + String(sunTeeth) + "_Planet_"+ String(PlanetTeeth) +"/";
         let filename = "Sun_" + String(sunTeeth) + "_Planet_" + String(PlanetTeeth) + ".glb";
 
-        for (let i = 1; i < scene.meshes.length; i++)
+        let noOfMeshes = scene.meshes.length - 1;
+        for (let i = noOfMeshes; i > 0; i--)
         {
           scene.meshes[i].dispose();
         }
@@ -82,10 +84,21 @@
               FixedSun.addTargetedAnimation(animation_group.targetedAnimations[0].animation, animation_group.targetedAnimations[0].target);
               FixedSun.setWeightForAllAnimatables(0);
             }
-
         }
 
         scene.animationGroups.splice(0,scene.animationGroups.length -2);
+
+        for (let i = panel.children.length - 1; i > 0; i--)
+        {
+          console.log(i);
+          if (panel.children[i].typeName == "StackPanel")
+          {
+            console.log(i);
+            console.log(panel.children[i]);
+            panel.children[i].dispose();
+            //stacks.push(radioButton);
+          }
+        }
 
         createWeightingRadioButtons(FixedRing, panel);
         createWeightingRadioButtons(FixedSun, panel);
@@ -115,7 +128,7 @@
         panel.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_CENTER;
         advancedTexture.addControl(panel);
 
-        createSlider(panel, "Speed: ", 5, 0, 1,  function(value) {
+        createSlider(panel, "Speed: ", 5, 0, 1, 0.01, function(value) {
           for (let animation_group of scene.animationGroups)
           {
             if (animation_group.isPlaying)
@@ -125,6 +138,11 @@
             }
           }
         });
+
+
+        createSlider(panel, "Sun Diameter [mm]: ", 30, 20, 20, 5, function(value) {
+          importJsonMeshes(scene, panel, value, 20);
+        })
 
         importJsonMeshes(scene, panel, 20, 20);
 
