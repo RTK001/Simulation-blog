@@ -129,11 +129,13 @@ class Planetary_Gears():
         self.planet_locations = []
 
 
-        self.setup_dir()
+
         self.calculate_planet_locations()
         self.calculate_speeds()
         for name, val in self.__dict__.items():
             print(name + ": {}".format(val))
+        self.create_gears()
+        self.setup_dir()
 
     def calculate_planet_locations(self):
         number_of_planets = 4
@@ -193,7 +195,7 @@ class Planetary_Gears():
         self.planet_speed = self.planet_speed.tolist()
 
 
-    def create(self):
+    def create_gears(self):
         '''
         Distinct function to call once all inputs have been set up.
         Will prepare the
@@ -243,7 +245,7 @@ class Planetary_Gears():
     def setup_dir(self):
         # create FolderName
         if self.name is None:
-            self.name = "Sun_" + str(self.sun_diameter) + "_Planet_" + str(self.planet_diameter)
+            self.name = "Sun_" + str(self.gears["Sun"].number_of_teeth) + "_Planet_" + str(self.gears["Planet1"].number_of_teeth)
 
         self.babylon_path = os.path.join(Planetary_Gears.babylon_folder, self.name)
         if not os.path.exists(self.babylon_path):
@@ -262,11 +264,14 @@ class Planetary_Gears():
             with open(os.path.join(pth, self.filename), "w") as f:
                 json.dump(self.__dict__, f, default=lambda o: o.__dict__, indent = 4)
 
-
-
-for sun_diam in range(20, 35, 5):
-    a = Planetary_Gears(pressure_angle=20, sun_diameter=sun_diam, planet_diameter=20, module=1, height=5)
-    a.create()
+height = 5 #cm
+module = 1
+planet_teeth = 10
+pressure_angle = 20
+for sun_teeth in range(5, 20, 5):
+    sun_diam = sun_teeth * 2 / module
+    planet_diam = planet_teeth * 2 / module
+    a = Planetary_Gears(pressure_angle=pressure_angle, sun_diameter=sun_diam, planet_diameter=planet_diam, module=module, height=height)
     a.save_json()
 
 

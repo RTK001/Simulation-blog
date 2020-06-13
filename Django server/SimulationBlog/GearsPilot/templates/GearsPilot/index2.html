@@ -55,10 +55,14 @@
 
 
 
-      function importJsonMeshes(scene, panel, sunTeeth, PlanetTeeth)
+      function importJsonMeshes(scene, panel, sunTeeth, planetTeeth)
       {
-        let base_address = "./static/GearsPilot/Sun_" + String(sunTeeth) + "_Planet_"+ String(PlanetTeeth) +"/";
-        let filename = "Sun_" + String(sunTeeth) + "_Planet_" + String(PlanetTeeth) + ".glb";
+        sunTeeth = Math.round(sunTeeth);
+        PlanetTeeth = Math.round(planetTeeth);
+        console.log(sunTeeth);
+        console.log(planetTeeth);
+        let base_address = "./static/GearsPilot/Sun_" + String(sunTeeth) + "_Planet_"+ String(planetTeeth) +"/";
+        let filename = "Sun_" + String(sunTeeth) + "_Planet_" + String(planetTeeth) + ".glb";
 
         let noOfMeshes = scene.meshes.length - 1;
         for (let i = noOfMeshes; i > 0; i--)
@@ -140,11 +144,11 @@
         });
 
 
-        createSlider(panel, "Sun Diameter [mm]: ", 30, 20, 20, 5, function(value) {
-          importJsonMeshes(scene, panel, value, 20);
+        createSlider(panel, "Sun Teeth: ", 15, 5, 5, 5, function(value) {
+          importJsonMeshes(scene, panel, value, 10);
         })
 
-        importJsonMeshes(scene, panel, 20, 20);
+        importJsonMeshes(scene, panel, 5, 10);
 
         scene.registerBeforeRender(function () {
           if (scene.meshes[5])
