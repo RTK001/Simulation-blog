@@ -65,14 +65,14 @@ function createWeightingControl(group, panel) {
 }
 
 
-function createWeightingRadioButtons(group, panel) {
-  console.log(group);
-  console.log("error?");
+function createWeightingRadioButtons(group, panel, isChecked = false) {
+
   var button = new BABYLON.GUI.RadioButton(group.name);
   button.width = "20px";
   button.height = "20px";
   button.color = "white";
   button.background = "green";
+  button.isChecked = isChecked;
   button.onIsCheckedChangedObservable.add(function(state)
   {
       if (state) {
@@ -84,6 +84,7 @@ function createWeightingRadioButtons(group, panel) {
         group.reset();
       }
   });
+
 
   var header = BABYLON.GUI.Control.AddHeader(button, group.name, "100px", { isHorizontal: true, controlFirst: true });
   header.height = "30px";

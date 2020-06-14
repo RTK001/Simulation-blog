@@ -53,14 +53,28 @@
       var canvas = document.getElementById("renderCanvas"); // Get the canvas element
       var engine = new BABYLON.Engine(canvas);
 
+      var animationSpeed = 1;
+
+
+      function speedSet(scene, value)
+      {
+        for (let animation_group of scene.animationGroups)
+        {
+          if (animation_group.isPlaying)
+          {
+              animation_group.speedRatio = value;
+              animation_group.play(true);
+          }
+        }
+      }
+
 
 
       function importJsonMeshes(scene, panel, sunTeeth, planetTeeth)
       {
+
         sunTeeth = Math.round(sunTeeth);
         PlanetTeeth = Math.round(planetTeeth);
-        console.log(sunTeeth);
-        console.log(planetTeeth);
         let base_address = "./static/GearsPilot/Sun_" + String(sunTeeth) + "_Planet_"+ String(planetTeeth) +"/";
         let filename = "Sun_" + String(sunTeeth) + "_Planet_" + String(planetTeeth) + ".glb";
 
@@ -94,17 +108,13 @@
 
         for (let i = panel.children.length - 1; i > 0; i--)
         {
-          console.log(i);
           if (panel.children[i].typeName == "StackPanel")
           {
-            console.log(i);
-            console.log(panel.children[i]);
             panel.children[i].dispose();
-            //stacks.push(radioButton);
           }
         }
 
-        createWeightingRadioButtons(FixedRing, panel);
+        createWeightingRadioButtons(FixedRing, panel, true);
         createWeightingRadioButtons(FixedSun, panel);
 
         });
@@ -132,20 +142,12 @@
         panel.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_CENTER;
         advancedTexture.addControl(panel);
 
-        createSlider(panel, "Speed: ", 5, 0, 1, 0.01, function(value) {
-          for (let animation_group of scene.animationGroups)
-          {
-            if (animation_group.isPlaying)
-            {
-                animation_group.speedRatio = value;
-                animation_group.play(true);
-            }
-          }
-        });
+        var speedSlider = createSlider(panel, "Speed: ", 5, 0, animationSpeed, 0.01, function(value) {speedSet(scene, value);});
 
-
-        createSlider(panel, "Sun Teeth: ", 15, 5, 5, 5, function(value) {
+        createSlider(panel, "Sun Teeth: ", 20, 5, 5, 5, function(value) {
+          let speedVal = speedSlider.value;
           importJsonMeshes(scene, panel, value, 10);
+          speedSlider.value = 0.2;
         })
 
         importJsonMeshes(scene, panel, 5, 10);
