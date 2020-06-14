@@ -33,11 +33,13 @@ class Involute():
 
     '''
 
+
     def __init__(self, pressure_angle, pitch_diameter, module):
         self.pressure_angle = pressure_angle
         self.pitch_diameter = pitch_diameter
         self.module = module
         self.calculate_parameters()
+
 
     def calculate_parameters(self):
         # calculate derived physical parameters
@@ -72,6 +74,7 @@ class Involute():
         self._dedendum_start_angle = self._angle_between_teeth + 2 * self._base_to_pitch_angle
         self._dedendum_end_angle = self._dedendum_start_angle + self._angle_between_teeth - 2 * self._base_to_pitch_angle
 
+
     def sanitise_start_angle(self, start_angle, narrow_range_sanitise = False):
         start_angle %= 2 * pi
         if start_angle < 0:
@@ -94,6 +97,7 @@ class Involute():
 
         return start_angle
 
+
     def calculate_involute(self, start_radius, end_radius, a = 0, inverse = False):
         t_max = sqrt((end_radius / start_radius)**2 - 1) # Formula worked out by hand. It seems to work. Fortunately.
         if not inverse:
@@ -108,6 +112,7 @@ class Involute():
 
         return x_prime, y_prime
 
+
     def create_points_on_circle(self, radius, start_angle = 0, end_angle = 360, input_radians = False):
         start_angle = self.sanitise_start_angle(start_angle)
         if input_radians:
@@ -118,6 +123,7 @@ class Involute():
         y = array(radius * sin(t))
         return x, y
 
+
     def create_involute1(self, start_angle):
         #start_angle = self.sanitise_start_angle(start_angle, True)
         start_angle = start_angle - self._base_to_pitch_angle # involute is drawn from base circle, but top level meshing is determined at pitch circle
@@ -127,6 +133,7 @@ class Involute():
             x_involute1 = append(x_coords, x_involute1)
             y_involute1 = append(y_coords, y_involute1)
         return x_involute1, y_involute1
+
 
     def create_involute2(self, start_angle):
         #start_angle = self.sanitise_start_angle(start_angle, True)
@@ -167,10 +174,12 @@ class Involute():
 
         return x_coords, y_coords
 
+
     def rotate_coords(self, x, y, angle):
         x_coords = x * cos(angle) - y * sin(angle)
         y_coords = x * sin(angle) + y * cos(angle)
         return x_coords, y_coords
+        
 
     def create_wheel(self, start_angle = 0):
         start_angle = self.sanitise_start_angle(start_angle, False)

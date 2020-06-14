@@ -143,6 +143,7 @@ def create_stl_from_json(parsed_json, delete_after_export = True):
         export_to_stl(occ, export_folder)
 
     adsk.doEvents() # pause to allow user to see gears
+    print("pause")
 
     if delete_after_export:
         [occ.deleteMe() for occ in tool_occurrences + occurrence_list]

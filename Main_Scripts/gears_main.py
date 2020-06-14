@@ -112,6 +112,14 @@ class Planetary_Gears():
     fusion_folder = os.path.join(os.path.abspath(base_dir),"Fusion_360_scripts", "Gearbox_Json_files")
     blender_folder = os.path.join(os.path.abspath(base_dir),"Blender_Scripts", "Json_files")
 
+    @staticmethod
+    def rotate_coords(x, y, angle, location = (0,0)):
+        x = x - location[0]
+        y = y - location[1]
+        x_coords = x * np.cos(angle) - y * np.sin(angle)
+        y_coords = x * np.sin(angle) + y * np.cos(angle)
+        return x_coords, y_coords
+
 
     def __init__(self, pressure_angle, sun_diameter, planet_diameter, module, height, name = None):
         # Easily instantiates properties, as defined in class properties. Can also accept any as a keyword argument.
@@ -127,41 +135,39 @@ class Planetary_Gears():
         self.y_offset = self.x_offset
 
         self.planet_locations = []
+        self.gear_start_angles = []
 
-
-
-        self.calculate_planet_locations()
         self.calculate_speeds()
-        for name, val in self.__dict__.items():
-            print(name + ": {}".format(val))
+        self.calculate_planet_positions()
         self.create_gears()
         self.setup_dir()
 
-    def calculate_planet_locations(self):
+    def calculate_planet_positions(self):
         number_of_planets = 4
-        # x and y offsets, to keep stl coordinates positive, as babylon doesn't support negative .stl coordinates
-        dist = (self.sun_diameter + self.planet_diameter)/2
-        x = lambda i: dist * np.cos(i * 2 * np.pi / number_of_planets) + self.x_offset
-        y = lambda i: dist * np.sin(i * 2 * np.pi / number_of_planets) + self.y_offset
+        ring_involute = Involute(self.pressure_angle, self.ring_diameter, self.module)
+
+        x = (self.sun_diameter + self.planet_diameter)/2
+        y = 0
+
         for i in range(number_of_planets):
-            self.planet_locations.append([x(i), y(i), 0])
+            # angle to put planet
+            desired_angle = 2 * np.pi * i / number_of_planets
+            # angle ring would have to rotate with static sun to move planet to desired angle
+            effective_ring_angle = desired_angle * (self.ring_speed[1] / self.carrier_speed[1])
+            # normalise it to make sure the ring can only rotate an integer number of teeth
+            effective_ring_angle -= effective_ring_angle % (2 * ring_involute._angle_between_teeth)
+            # convert to actual carrier angle
+            carrier_angle = effective_ring_angle * self.carrier_speed[1] / self.ring_speed[1]
 
-    def calculate_gear_start_angle(self, gear):
-            x_loc, y_loc, _ = gear.location
-            x_loc -= self.x_offset
-            y_loc -= self.y_offset
-            if x_loc == 0:
-                if y_loc > 0:
-                    angle_to_sun = np.pi/2
-                else:
-                    angle_to_sun = -np.pi/2
-            else:
-                if x_loc > 0:
-                    angle_to_sun = np.arctan(y_loc / x_loc)
-                else:
-                    angle_to_sun = np.arctan(y_loc / x_loc) + np.pi
-
-            gear.start_angle = angle_to_sun * (1 + (self.gears["Sun"].number_of_teeth / gear.number_of_teeth))
+            planet_angle = carrier_angle * (self.planet_speed[1] + self.carrier_speed[1]) / self.carrier_speed[1]
+            # rotate carrier to correct location
+            x_coords, y_coords = Planetary_Gears.rotate_coords(x, y, carrier_angle)
+            # add x and y offsets to prevent negative .stl coordinates
+            x_coords += self.x_offset
+            y_coords += self.y_offset
+            # store locations and angles
+            self.planet_locations.append([x_coords, y_coords, 0])
+            self.gear_start_angles.append(planet_angle)
 
 
     def calculate_speeds(self):
@@ -170,7 +176,6 @@ class Planetary_Gears():
         self.sun_speed = np.array([1.0, 0.0])
         self.ring_speed = np.array([0.0, 1.0])
         effective_carrier_diameter = (self.sun_diameter + self.planet_diameter)/2
-
 
         v_sun = self.sun_diameter * self.sun_speed
         v_ring = self.ring_diameter * self.ring_speed
@@ -198,7 +203,6 @@ class Planetary_Gears():
     def create_gears(self):
         '''
         Distinct function to call once all inputs have been set up.
-        Will prepare the
         '''
         self.gears = {} # clear any previous gears
         self.carriers = {}
@@ -236,7 +240,9 @@ class Planetary_Gears():
                                         assembly = self,
                                         location = self.planet_locations[i],
                                         gear_ratio_to_sun = self.planet_diameter /  self.sun_diameter)
-            self.calculate_gear_start_angle(self.gears[name])
+            #self.calculate_gear_start_angle(self.gears[name])
+            self.gears[name].start_angle = self.gear_start_angles[i]
+
             for i, condition in enumerate(self.boundary_conditions):
                 self.gears[name].add_rotation(condition, speed = self.planet_speed[i])
                 self.gears[name].add_rotation(condition, speed = self.carrier_speed[i], parent_point = self.carriers["PlanetCarrier"])
@@ -264,25 +270,28 @@ class Planetary_Gears():
             with open(os.path.join(pth, self.filename), "w") as f:
                 json.dump(self.__dict__, f, default=lambda o: o.__dict__, indent = 4)
 
+
+
 height = 5 #cm
 module = 1
 planet_teeth = 10
 pressure_angle = 20
-for sun_teeth in range(5, 20, 5):
+for sun_teeth in range(5, 25, 5):
     sun_diam = sun_teeth * 2 / module
     planet_diam = planet_teeth * 2 / module
     a = Planetary_Gears(pressure_angle=pressure_angle, sun_diameter=sun_diam, planet_diameter=planet_diam, module=module, height=height)
     a.save_json()
 
 
-# Run Fusion 360
-fusion360_run_path = r"C:\Users\rishi\AppData\Local\Autodesk\webdeploy\production"
-launchers = glob.glob(os.path.join(fusion360_run_path, "*", "FusionLauncher.exe"))
-prc = subprocess.run(launchers[-1]) # will block until program closed
+if True:
 
+    # Run Fusion 360
+    fusion360_run_path = r"C:\Users\rishi\AppData\Local\Autodesk\webdeploy\production"
+    launchers = glob.glob(os.path.join(fusion360_run_path, "*", "FusionLauncher.exe"))
+    prc = subprocess.run(launchers[-1]) # will block until program closed
 
-# Run blender script
-base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-blender_script_path = os.path.join(base_dir, "Blender_Scripts")
-file = "Import_Gears.py"
-subprocess.run(r'D:\Program Files\blender --background --python "{}"'.format(os.path.join(blender_script_path, file)))
+    # Run blender script
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    blender_script_path = os.path.join(base_dir, "Blender_Scripts")
+    file = "Import_Gears.py"
+    subprocess.run(r'D:\Program Files\blender --background --python "{}"'.format(os.path.join(blender_script_path, file)))
