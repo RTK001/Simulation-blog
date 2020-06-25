@@ -1,1 +1,1 @@
-web: gunicorn DjangoServer.SimulationBlog.wsgi
+web: gunicorn SimulationBlog.wsgi
