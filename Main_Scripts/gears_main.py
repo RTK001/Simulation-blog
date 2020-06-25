@@ -294,4 +294,5 @@ if True:
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     blender_script_path = os.path.join(base_dir, "Blender_Scripts")
     file = "Import_Gears.py"
-    subprocess.run(r'D:\Program Files\blender --background --python "{}"'.format(os.path.join(blender_script_path, file)))
+    #subprocess.run(r'D:\Program Files\blender --background --python "{}"'.format(os.path.join(blender_script_path, file)))
+    subprocess.run(r'D:\Program Files\blender --python "{}"'.format(os.path.join(blender_script_path, file)))

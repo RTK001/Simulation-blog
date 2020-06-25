@@ -83,7 +83,7 @@
         {
           scene.meshes[i].dispose();
         }
-        BABYLON.SceneLoader.Append(base_address, filename, scene, function (scene) {
+        BABYLON.SceneLoader.Append(base_address, filename, scene, function (scene, meshes) {
         scene.stopAllAnimations();
 
         var FixedRing = new BABYLON.AnimationGroup("FixedRing");
@@ -144,25 +144,27 @@
 
         var speedSlider = createSlider(panel, "Speed: ", 5, 0, animationSpeed, 0.01, function(value) {speedSet(scene, value);});
 
-        createSlider(panel, "Sun Teeth: ", 20, 5, 5, 5, function(value) {
-          let speedVal = speedSlider.value;
-          importJsonMeshes(scene, panel, value, 10);
-          speedSlider.value = 0.2;
-        })
-
         importJsonMeshes(scene, panel, 5, 10);
+
+        // create Planet which currently does nothing
+        var planetSlider = createSlider(panel, "Planet Teeth: ", 10, 10, 10, 10, function(value) {
+          console.log("Currently does nothing!!");
+        });
+
+        var sunSlider = createSlider(panel, "Sun Teeth: ", 20, 5, 5, 5, function(value) {
+                let speedVal = speedSlider.value;
+                let planetTeeth = planetSlider.value;
+                importJsonMeshes(scene, panel, value, 10);
+                speedSlider.value = 0.2;
+              });
+
+
 
         scene.registerBeforeRender(function () {
           if (scene.meshes[5])
           { let pos = scene.meshes[5].absolutePosition;
-            /*
-            pos.x = Math.round(pos.x * 10) / 10;
-            pos.y = Math.round(pos.y * 10) / 10;
-            pos.z = Math.round(pos.z * 10) / 10;
-            */
             time += engine.getDeltaTime()/1000;
             Plotly.extendTraces("tester", {x:[[time], [time]], y:[[pos.x], [pos.z]]}, [0,1], 200);
-
           }
 
         });
