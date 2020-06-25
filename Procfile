@@ -1,1 +1,1 @@
-web: gunicorn SimulationBlog.wsgi
+web: gunicorn --pythonpath DjangoServer SimulationBlog.wsgi
