@@ -21,10 +21,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-from .SecretKey import SECRET_KEY
+SECRET_KEY = os.environ["DJANGO_SECRETKEY"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = (os.environ["DJANGO_DEBUG"] == "TRUE")
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 ALLOWED_HOSTS.append(get_ipv4())
@@ -75,6 +75,17 @@ WSGI_APPLICATION = 'SimulationBlog.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
+#DATABASES = {
+#    'default' : {
+#        'ENGINE' : 'django.db.backends.postgresql_psycopg2',
+#        'NAME' : '',
+#        'USER' : '',
+#        'PASSWORD' : '',
+#        'HOST' : '',
+#        'PORT' : '',
+#    }
+#}
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -120,3 +131,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# configure django app for heroku
+import django_heroku
+django_heroku.settings(locals())
