@@ -6,4 +6,3 @@ db.sqlite3
 SecretKey.py
 *.stl
 *.STL
-*.glb
