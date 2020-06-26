@@ -93,6 +93,11 @@
         }
         BABYLON.SceneLoader.Append(base_address, filename, scene, function (scene, meshes) {
         scene.stopAllAnimations();
+        scene.materials = [];
+        for (let mesh of scene.meshes)
+        {
+          mesh.material = new BABYLON.StandardMaterial(mesh.name+"mat", scene);
+        }
 
         var FixedRing = new BABYLON.AnimationGroup("FixedRing");
         var FixedSun = new BABYLON.AnimationGroup("FixedSun");
@@ -166,11 +171,40 @@
                 speedSlider.value = 0.2;
               });
 
+        var pauseButton = createButton(panel, "Pause", "Pause", function() {
 
+        });
+
+        var fullScreenButton = createButton(panel, "FullScreen", "FullScreen", function() {
+          if (engine.isFullscreen)
+          {engine.exitFullscreen();}
+          else
+          {engine.enterFullscreen();}
+        });
+
+        var Selected = null;
+        var defaultDiffuseColor = new BABYLON.Color3(1,1,1);
+        var selectedDiffuseColor = new BABYLON.Color3(1,0.65,0);
+        scene.onPointerObservable.add(function(evt) {
+          let pickResult = evt.pickInfo
+            if (pickResult.hit)
+            {
+              for (let mesh of scene.meshes)
+              {
+                if (mesh == pickResult.pickedMesh)
+                  {mesh.material.diffuseColor = selectedDiffuseColor;
+                  Selected = mesh;}
+                else
+                {mesh.material.diffuseColor = defaultDiffuseColor;}
+              }
+          }
+          else
+          {Selected = null;}
+        }, BABYLON.PointerEventTypes.POINTERUP);
 
         scene.registerBeforeRender(function () {
-          if (scene.meshes[5])
-          { let pos = scene.meshes[5].absolutePosition;
+          if (Selected)
+          { let pos = Selected.absolutePosition;
             time += engine.getDeltaTime()/1000;
             Plotly.extendTraces("tester", {x:[[time], [time]], y:[[pos.x], [pos.z]]}, [0,1], 200);
           }

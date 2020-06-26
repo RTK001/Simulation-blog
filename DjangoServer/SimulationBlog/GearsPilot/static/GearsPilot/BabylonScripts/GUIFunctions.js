@@ -81,7 +81,7 @@ function createWeightingRadioButtons(group, panel, isChecked = false) {
       }
       else {
         group.setWeightForAllAnimatables(0);
-        group.reset();
+        group.pause();
       }
   });
 
@@ -91,4 +91,18 @@ function createWeightingRadioButtons(group, panel, isChecked = false) {
 
   panel.addControl(header);
 
+}
+
+function createButton(panel, name, text, func) {
+  var button = BABYLON.GUI.Button.CreateSimpleButton(name, text);
+    //button.width = 0.2;
+    button.height = "40px";
+    button.color = "white";
+    button.background = "black";
+    button.onPointerClickObservable.add(function(){
+      func();
+    });
+
+    panel.addControl(button);
+    return button;
 }
