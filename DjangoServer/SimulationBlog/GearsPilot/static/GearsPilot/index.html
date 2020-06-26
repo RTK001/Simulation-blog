@@ -1,0 +1,78 @@
+
+{% extends 'Numenera/base.html' %}
+{% block content %}
+
+<h1> Stories </h1>
+  <body>
+    {% for story in stories %}
+
+      <div class = "box_a" id="Character_Box" style="height:125px">
+        <a href= "{% url 'Numenera:Stories' story.slug %}">
+        <div>
+        <table id="Overview_Table">
+          <thead>
+             <td colspan = "2">  {{ story.name }} </td>
+           </thead>
+        </table>
+        </div>
+        </a>
+      </div>
+
+    {% endfor %}
+
+
+      <div class = "box_a" id = "New_Character_box">
+        <a href = "{% url 'Numenera:StoryCreateView' %}">
+          <div>
+        <h1> + </h1>
+        </div>
+        </a>
+      </div>
+
+  </body>
+
+<h1> Characters </h1>
+  <body>
+    {% for character in character_list %}
+
+      <div class = "box_a" id="Character_Box" style="height:125px">
+        <a href= "{% url 'Numenera:Characters' character.slug %}">
+        <div>
+        <div class="Index_Character_Thumbnail"> <img  src = "{{ character.image.url }}"> </div>
+        <table id="Overview_Table">
+          <thead>
+             <td colspan = "2">  {{ character.name }} </td>
+           </thead>
+          <tbody id = "Character_TableBody">
+              <tr>
+                <td><strong> Descriptor </strong></td>
+                <td> {{ character.descriptor }} </td>
+              </tr>
+              <tr>
+                <td><strong> Type </strong></td>
+                <td> {{ character.type }} </td>
+              </tr>
+              <tr>
+                <td><strong> Focus </strong></td>
+                <td> {{ character.focus }} </td>
+              </tr>
+            </tbody>
+        </table>
+        </div>
+        </a>
+      </div>
+
+    {% endfor %}
+
+
+      <div class = "box_a" id = "New_Character_box">
+        <a href = "{% url 'Numenera:CharacterCreateView' %}">
+          <div>
+        <h1> + </h1>
+        </div>
+        </a>
+      </div>
+
+  </body>
+
+{% endblock content %}
