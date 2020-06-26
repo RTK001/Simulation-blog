@@ -62,8 +62,6 @@
       var engine = new BABYLON.Engine(canvas);
 
       var animationSpeed = 1;
-
-
       function speedSet(scene, value)
       {
         for (let animation_group of scene.animationGroups)
@@ -74,6 +72,7 @@
               animation_group.play(true);
           }
         }
+        animationSpeed = value;
       }
 
 
@@ -171,8 +170,18 @@
                 speedSlider.value = 0.2;
               });
 
+        var isPaused = false;
         var pauseButton = createButton(panel, "Pause", "Pause", function() {
-
+          if (!isPaused) {
+              let tempSpeed = animationSpeed;
+              speedSet(scene, 0);
+              animationSpeed = tempSpeed;
+              isPaused = true;
+            }
+          else {
+            speedSet(scene, animationSpeed);
+            isPaused = false;
+          }
         });
 
         var fullScreenButton = createButton(panel, "FullScreen", "FullScreen", function() {
