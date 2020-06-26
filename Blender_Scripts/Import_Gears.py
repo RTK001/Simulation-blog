@@ -114,7 +114,8 @@ remove_cube()
 
 # specify json
 blender_folder = os.path.dirname(os.path.abspath(__file__))
-json_path = os.path.join(blender_folder, "Json_files")
+blend_filepath = os.path.join(blender_folder, "Blender_files") # path to save .blend files
+json_path = os.path.join(blender_folder, "Json_files") # path to get json files
 files = os.listdir(json_path)
 
 for json_file in files:
@@ -143,6 +144,10 @@ for json_file in files:
     # export to .gltf
     filepath = os.path.join(gl.loaded_json["babylon_path"], gl.loaded_json["name"])
     bpy.ops.export_scene.gltf(export_format="GLB", filepath=filepath)
+
+    # save .blend files
+    blend_file_loc = os.path.join(blend_filepath, gl.loaded_json["name"] + ".blend")
+    bpy.ops.wm.save_as_mainfile(filepath = blend_file_loc)
 
     # delete everything
     for object in bpy.data.objects:

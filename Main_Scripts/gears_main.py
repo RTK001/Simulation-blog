@@ -108,7 +108,7 @@ class Gear():
 class Planetary_Gears():
 
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    babylon_folder = os.path.join(os.path.abspath(base_dir),"Django server", "SimulationBlog", "GearsPilot", "static", "GearsPilot")
+    babylon_folder = os.path.join(os.path.abspath(base_dir),"DjangoServer", "SimulationBlog", "GearsPilot", "static", "GearsPilot")
     fusion_folder = os.path.join(os.path.abspath(base_dir),"Fusion_360_scripts", "Gearbox_Json_files")
     blender_folder = os.path.join(os.path.abspath(base_dir),"Blender_Scripts", "Json_files")
 
@@ -288,11 +288,10 @@ if True:
     # Run Fusion 360
     fusion360_run_path = r"C:\Users\rishi\AppData\Local\Autodesk\webdeploy\production"
     launchers = glob.glob(os.path.join(fusion360_run_path, "*", "FusionLauncher.exe"))
-    prc = subprocess.run(launchers[-1]) # will block until program closed
+    #prc = subprocess.run(launchers[-1]) # will block until program closed
 
     # Run blender script
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     blender_script_path = os.path.join(base_dir, "Blender_Scripts")
     file = "Import_Gears.py"
-    #subprocess.run(r'D:\Program Files\blender --background --python "{}"'.format(os.path.join(blender_script_path, file)))
-    subprocess.run(r'D:\Program Files\blender --python "{}"'.format(os.path.join(blender_script_path, file)))
+    subprocess.run(r'D:\Program Files\blender --background --python "{}"'.format(os.path.join(blender_script_path, file)))
