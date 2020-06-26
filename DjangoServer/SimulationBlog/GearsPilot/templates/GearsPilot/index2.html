@@ -46,11 +46,20 @@
     <script>
 
       Tester = document.getElementById("tester");
-      var plt = Plotly.newPlot( Tester, [{
-        x: [0],
-        y: [0],}, {x:[0], y:[0]}],
+      var trace1 = {
+        x:[0],
+        y:[0],
+        name:"X-Coordinate",
+      }
+      var trace2 = {
+        x:[0],
+        y:[0],
+        name:"Y-Coordinate",
+      }
+      var plt = Plotly.newPlot( Tester, [trace1, trace2],
         {
-          margin : {t:0}
+          margin : {t:0},
+          title : "X and Y coordinates of selected gear"
         });
       var time = 0;
 
@@ -217,9 +226,7 @@
             time += engine.getDeltaTime()/1000;
             Plotly.extendTraces("tester", {x:[[time], [time]], y:[[pos.x], [pos.z]]}, [0,1], 200);
           }
-
         });
-
         return scene;
       }
 
