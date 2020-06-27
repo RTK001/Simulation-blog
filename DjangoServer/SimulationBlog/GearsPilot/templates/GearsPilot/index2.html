@@ -15,11 +15,6 @@
                 padding: 0;
             }
 
-            #renderCanvas {
-                width: 100%;
-                height: 60%;
-                touch-action: none;
-            }
         </style>
 
         {% load static %}
@@ -37,7 +32,7 @@
     <div class="w3-row">
       <!-- Blog entry -->
 <div class="w3-card-4 w3-margin w3-white">
-  <canvas id="renderCanvas" touch-action="none" onDrop = "dropHandler(event);"></canvas>
+  <canvas id="renderCanvas" touch-action="none" style="width:100%;height:60%" onDrop = "dropHandler(event);"></canvas>
   <div id="tester" style = "width:100%;height:40%;"> </div>
 </div>
 
@@ -163,7 +158,28 @@
         panel.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_CENTER;
         advancedTexture.addControl(panel);
 
-        var speedSlider = createSlider(panel, "Speed: ", 5, 0, animationSpeed, 0.01, function(value) {speedSet(scene, value);});
+        var leftPanel =  new BABYLON.GUI.StackPanel();
+        leftPanel.width = "220px";
+        leftPanel.height = "220px";
+        leftPanel.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+        leftPanel.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+        leftPanel.background = "black";
+        leftPanel.alpha = 0.5;
+        leftPanel.isVisible = false;
+        advancedTexture.addControl(leftPanel);
+
+        var bottomPanel = new BABYLON.GUI.StackPanel();
+        bottomPanel.isVertical = false;
+        bottomPanel.width = 1;
+        bottomPanel.height = "50px";
+        bottomPanel.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
+        bottomPanel.background = "black";
+        bottomPanel.alpha = 0.5;
+        bottomPanel.isVisible = true;
+        advancedTexture.addControl(bottomPanel);
+
+        var speedSlider = createSlider(bottomPanel, "Speed: ", 5, 0, animationSpeed, 0.01, function(value) {speedSet(scene, value);});
+        speedSlider.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
 
         importJsonMeshes(scene, panel, 5, 10);
 
@@ -180,25 +196,34 @@
               });
 
         var isPaused = false;
-        var pauseButton = createButton(panel, "Pause", "Pause", function() {
+        var pauseButton = createButton(bottomPanel, "Pause", "Pause", function() {
           if (!isPaused) {
               let tempSpeed = animationSpeed;
               speedSet(scene, 0);
               animationSpeed = tempSpeed;
               isPaused = true;
+              pauseButton.textBlock.text = "Play";
             }
           else {
             speedSet(scene, animationSpeed);
             isPaused = false;
+            pauseButton.textBlock.text = "Pause";
           }
         });
+        pauseButton.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
 
-        var fullScreenButton = createButton(panel, "FullScreen", "FullScreen", function() {
+        var fullScreenButton = createButton(bottomPanel, "FullScreen", "FullScreen", function() {
           if (engine.isFullscreen)
           {engine.exitFullscreen();}
           else
           {engine.enterFullscreen();}
         });
+        fullScreenButton.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+
+
+        var selectedName = createText(leftPanel, "Selected Object: ");
+
+
 
         var Selected = null;
         var defaultDiffuseColor = new BABYLON.Color3(1,1,1);
@@ -210,15 +235,20 @@
               for (let mesh of scene.meshes)
               {
                 if (mesh == pickResult.pickedMesh)
-                  {mesh.material.diffuseColor = selectedDiffuseColor;
-                  Selected = mesh;}
+                  {
+                    mesh.material.diffuseColor = selectedDiffuseColor;
+                    Selected = mesh;
+                    leftPanel.isVisible = true;
+                    selectedName.text = "Selected Object: " + Selected.name;
+                  }
                 else
                 {mesh.material.diffuseColor = defaultDiffuseColor;}
               }
-          }
-          else
-          {Selected = null;}
-        }, BABYLON.PointerEventTypes.POINTERUP);
+        }}, BABYLON.PointerEventTypes.POINTERUP);
+
+
+
+
 
         scene.registerBeforeRender(function () {
           if (Selected)

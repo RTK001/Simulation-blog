@@ -15,6 +15,7 @@ function createSlider(panel, title, maxVal, minVal, initialVal, step, onChange)
   var header = new BABYLON.GUI.TextBlock();
   header.text = title + Math.round(initialVal*10)/10
   header.height = sliderHeaderHeight;
+  header.width = sliderWidth;
   header.color = headerColor;
   panel.addControl(header);
 
@@ -88,14 +89,13 @@ function createWeightingRadioButtons(group, panel, isChecked = false) {
 
   var header = BABYLON.GUI.Control.AddHeader(button, group.name, "100px", { isHorizontal: true, controlFirst: true });
   header.height = "30px";
-
+  header.width = "120px";
   panel.addControl(header);
-
 }
 
 function createButton(panel, name, text, func) {
   var button = BABYLON.GUI.Button.CreateSimpleButton(name, text);
-    //button.width = 0.2;
+    button.width = "100px";
     button.height = "40px";
     button.color = "white";
     button.background = "black";
@@ -105,4 +105,15 @@ function createButton(panel, name, text, func) {
 
     panel.addControl(button);
     return button;
+}
+
+function createText(panel, text) {
+  var textBlock = new BABYLON.GUI.TextBlock();
+  textBlock.text = text;
+  textBlock.color = "white";
+  textBlock.fontsize = 24;
+  textBlock.height = "30px";
+  textBlock.width = "200px";
+  panel.addControl(textBlock);
+  return textBlock;
 }

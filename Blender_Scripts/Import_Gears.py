@@ -55,6 +55,7 @@ class GearsJsonLoader():
             gear_object = bpy.data.objects[gear_name]
             gear_object.location = self.subtract_offsets(gear["location"])
 
+
     def create_carrier(self, carrier_dict):
         loc = (carrier_dict["x"], carrier_dict["y"], carrier_dict["z"])
         loc = self.subtract_offsets(loc)
