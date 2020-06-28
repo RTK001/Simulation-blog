@@ -39,14 +39,13 @@ class GearsJsonLoader():
 
     @property
     def gears(self):
-        return [bpy.data.object[name] for name in self.gears_names]
+        return [bpy.data.objects[name] for name in self.gears_names]
 
     def subtract_offsets(self, loc):
         temp_sub = lambda a,b: a - b
         return list(map(temp_sub, loc, self.offsets))
 
     def load_gears(self):
-
         self.gears_names = [] # reset gear_names
         for gear_name, gear in self.loaded_json["gears"].items():
             filepath = os.path.join(self.stl_path, gear_name + ".stl")
@@ -55,6 +54,11 @@ class GearsJsonLoader():
             gear_object = bpy.data.objects[gear_name]
             gear_object.location = self.subtract_offsets(gear["location"])
 
+    def decimate_gears(self):
+        for gear in self.gears:
+            gear.modifiers.new("Planar_Decimate", "DECIMATE")
+            gear.modifiers["Planar_Decimate"].decimate_type = "DISSOLVE"
+            gear.modifiers["Planar_Decimate"].angle_limit = 1 * (pi / 180)
 
     def create_carrier(self, carrier_dict):
         loc = (carrier_dict["x"], carrier_dict["y"], carrier_dict["z"])
@@ -124,6 +128,7 @@ for json_file in files:
     #gl.load_all_skeleton()
 
     gl.load_gears()
+    gl.decimate_gears()
     carrier = create_point("Carrier")
     carrier_animated = []
     for name, gear in gl.loaded_json["gears"].items():
@@ -144,7 +149,7 @@ for json_file in files:
 
     # export to .gltf
     filepath = os.path.join(gl.loaded_json["babylon_path"], gl.loaded_json["name"])
-    bpy.ops.export_scene.gltf(export_format="GLB", filepath=filepath)
+    bpy.ops.export_scene.gltf(export_format="GLB", export_apply = True, filepath=filepath)
 
     # save .blend files
     blend_file_loc = os.path.join(blend_filepath, gl.loaded_json["name"] + ".blend")
