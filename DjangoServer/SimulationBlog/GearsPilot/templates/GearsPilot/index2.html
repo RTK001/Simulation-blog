@@ -81,6 +81,21 @@
 
 
 
+      function LoadJSON(scene, name) {
+          // Loads the JSON data
+          var Files = [];
+          // URL for JSON file. Should abstract this.
+          let fileListURL = "./static/GearsPilot/" + name + ".json";
+          let request = new XMLHttpRequest();
+          request.open("GET", fileListURL);
+          request.responseType = "json";
+          request.send();
+          request.onload = function(Files) {
+            Files = request.response;
+            }
+          return Files;
+          }
+
       function importJsonMeshes(scene, panel, sunTeeth, planetTeeth)
       {
 
@@ -184,11 +199,11 @@
         importJsonMeshes(scene, panel, 5, 10);
 
         // create Planet which currently does nothing
-        var planetSlider = createSlider(panel, "Planet Teeth: ", 10, 10, 10, 10, function(value) {
+        var planetSlider = createSlider(panel, "Planet Teeth: ", {{ planet_max }}, {{ planet_min }}, 10, {{ planet_diff }}, function(value) {
           console.log("Currently does nothing!!");
         });
 
-        var sunSlider = createSlider(panel, "Sun Teeth: ", 20, 5, 5, 5, function(value) {
+        var sunSlider = createSlider(panel, "Sun Teeth: ", {{ sun_max }}, {{ sun_min }}, 5,  {{ sun_diff }}, function(value) {
                 let speedVal = speedSlider.value;
                 let planetTeeth = planetSlider.value;
                 importJsonMeshes(scene, panel, value, 10);
