@@ -109,7 +109,7 @@
                     ]
                 }
             ],
-            "start_angle": 0,
+            "start_angle": 0.3141592653589793,
             "number_of_teeth": 10
         },
         "Ring": {

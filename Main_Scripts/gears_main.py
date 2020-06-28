@@ -170,6 +170,8 @@ class Planetary_Gears():
             self.gear_start_angles.append(planet_angle)
 
 
+
+
     def calculate_speeds(self):
         ''' calculates all gear rotational velocities '''
         self.boundary_conditions = ["FixedRing", "FixedSun"]
@@ -247,6 +249,10 @@ class Planetary_Gears():
                 self.gears[name].add_rotation(condition, speed = self.planet_speed[i])
                 self.gears[name].add_rotation(condition, speed = self.carrier_speed[i], parent_point = self.carriers["PlanetCarrier"])
 
+        # if planets have an odd number of teeth, sun won't start in correct rotation
+        if self.gears["Planet1"].number_of_teeth % 2: # if planets have an odd number of teeth
+            self.gears["Sun"].start_angle += np.pi / self.gears["Sun"].number_of_teeth
+
 
     def setup_dir(self):
         # create FolderName
@@ -294,7 +300,7 @@ if True:
     # Run Fusion 360
     fusion360_run_path = r"C:\Users\rishi\AppData\Local\Autodesk\webdeploy\production"
     launchers = glob.glob(os.path.join(fusion360_run_path, "*", "FusionLauncher.exe"))
-    prc = subprocess.run(launchers[-1]) # will block until program closed
+    prc = subprocess.run(launchers[0]) # will block until program closed
 
     # Run blender script
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
