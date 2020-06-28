@@ -158,7 +158,7 @@
         // Add a camera to the scene and attach it to the canvas
         var camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 2, 0.6 * Math.PI / 2, 2, new BABYLON.Vector3(0,80,90), scene);
         camera.setTarget(BABYLON.Vector3.Zero());
-        camera.attachControl(canvas, true);
+        camera.attachControl(canvas, false);
         scene.activeCamera.panningSensibility = 50;
 
         // Add lights to the scene
