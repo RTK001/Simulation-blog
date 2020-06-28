@@ -1,71 +1,71 @@
 {
     "pressure_angle": 20,
-    "sun_diameter": 20.0,
-    "planet_diameter": 20.0,
-    "ring_diameter": 60.0,
+    "sun_diameter": 40.0,
+    "planet_diameter": 30.0,
+    "ring_diameter": 100.0,
     "module": 1,
     "height": 5,
-    "name": "Sun_10_Planet_10",
-    "x_offset": 60.0,
-    "y_offset": 60.0,
+    "name": "Sun_20_Planet_15_Pressure_20",
+    "x_offset": 100.0,
+    "y_offset": 100.0,
     "planet_locations": [
         [
-            80.0,
-            60.0,
+            135.0,
+            100.0,
             0
         ],
         [
-            63.128689300804616,
-            79.75376681190275,
+            101.57026906226801,
+            134.964757328946,
             0
         ],
         [
-            40.24623318809725,
-            63.128689300804616,
+            65.14089971016664,
+            103.13737581162015,
             0
         ],
         [
-            59.99999999999999,
-            40.0,
+            98.429730937732,
+            65.035242671054,
             0
         ]
     ],
     "gear_start_angles": [
         0.0,
-        2.827433388230814,
-        5.969026041820607,
-        9.42477796076938
+        3.5604716740684337,
+        7.120943348136867,
+        10.890854532444619
     ],
     "boundary_conditions": [
         "FixedRing",
         "FixedSun"
     ],
     "sun_speed": [
-        4.0,
+        3.5,
         0.0
     ],
     "ring_speed": [
         0.0,
-        1.3333333333333333
+        1.4
     ],
     "carrier_speed": [
         1.0,
         1.0
     ],
     "planet_speed": [
-        -3.0,
-        1.0
+        -3.3333333333333335,
+        1.3333333333333335
     ],
     "gears": {
         "Sun": {
             "name": "Sun",
-            "diameter": 20.0,
+            "diameter": 40.0,
             "filename": "Sun.stl",
             "_pressure_angle": 20,
             "_module": 1,
             "location": [
-                60.0,
-                60.0,
+                100.0,
+                100.0,
                 0
             ],
             "gear_ratio_to_sun": 1,
@@ -81,11 +81,11 @@
                         },
                         {
                             "frame": 50,
-                            "value": 12.566370614359172
+                            "value": 10.995574287564276
                         },
                         {
                             "frame": 100,
-                            "value": 25.132741228718345
+                            "value": 21.991148575128552
                         }
                     ]
                 },
@@ -110,17 +110,17 @@
                 }
             ],
             "start_angle": 0,
-            "number_of_teeth": 10
+            "number_of_teeth": 20
         },
         "Ring": {
             "name": "Ring",
-            "diameter": 60.0,
+            "diameter": 100.0,
             "filename": "Ring.stl",
             "_pressure_angle": 20,
             "_module": 1,
             "location": [
-                60.0,
-                60.0,
+                100.0,
+                100.0,
                 0
             ],
             "gear_ratio_to_sun": 0.0,
@@ -155,30 +155,30 @@
                         },
                         {
                             "frame": 50,
-                            "value": 4.1887902047863905
+                            "value": 4.39822971502571
                         },
                         {
                             "frame": 100,
-                            "value": 8.377580409572781
+                            "value": 8.79645943005142
                         }
                     ]
                 }
             ],
             "start_angle": 0,
-            "number_of_teeth": 30
+            "number_of_teeth": 50
         },
         "Planet1": {
             "name": "Planet1",
-            "diameter": 20.0,
+            "diameter": 30.0,
             "filename": "Planet1.stl",
             "_pressure_angle": 20,
             "_module": 1,
             "location": [
-                80.0,
-                60.0,
+                135.0,
+                100.0,
                 0
             ],
-            "gear_ratio_to_sun": 1.0,
+            "gear_ratio_to_sun": 0.75,
             "animations": [
                 {
                     "name": "FixedRing",
@@ -191,11 +191,11 @@
                         },
                         {
                             "frame": 50,
-                            "value": -9.42477796076938
+                            "value": -10.471975511965978
                         },
                         {
                             "frame": 100,
-                            "value": -18.84955592153876
+                            "value": -20.943951023931955
                         }
                     ]
                 },
@@ -219,8 +219,8 @@
                     ],
                     "parent_point": {
                         "name": "PlanetCarrierAnim",
-                        "x": 60.0,
-                        "y": 60.0,
+                        "x": 100.0,
+                        "y": 100.0,
                         "z": 0
                     }
                 },
@@ -235,11 +235,11 @@
                         },
                         {
                             "frame": 50,
-                            "value": 3.141592653589793
+                            "value": 4.188790204786391
                         },
                         {
                             "frame": 100,
-                            "value": 6.283185307179586
+                            "value": 8.377580409572783
                         }
                     ]
                 },
@@ -263,27 +263,27 @@
                     ],
                     "parent_point": {
                         "name": "PlanetCarrierAnim",
-                        "x": 60.0,
-                        "y": 60.0,
+                        "x": 100.0,
+                        "y": 100.0,
                         "z": 0
                     }
                 }
             ],
             "start_angle": 0.0,
-            "number_of_teeth": 10
+            "number_of_teeth": 15
         },
         "Planet2": {
             "name": "Planet2",
-            "diameter": 20.0,
+            "diameter": 30.0,
             "filename": "Planet2.stl",
             "_pressure_angle": 20,
             "_module": 1,
             "location": [
-                63.128689300804616,
-                79.75376681190275,
+                101.57026906226801,
+                134.964757328946,
                 0
             ],
-            "gear_ratio_to_sun": 1.0,
+            "gear_ratio_to_sun": 0.75,
             "animations": [
                 {
                     "name": "FixedRing",
@@ -296,11 +296,11 @@
                         },
                         {
                             "frame": 50,
-                            "value": -9.42477796076938
+                            "value": -10.471975511965978
                         },
                         {
                             "frame": 100,
-                            "value": -18.84955592153876
+                            "value": -20.943951023931955
                         }
                     ]
                 },
@@ -324,8 +324,8 @@
                     ],
                     "parent_point": {
                         "name": "PlanetCarrierAnim",
-                        "x": 60.0,
-                        "y": 60.0,
+                        "x": 100.0,
+                        "y": 100.0,
                         "z": 0
                     }
                 },
@@ -340,11 +340,11 @@
                         },
                         {
                             "frame": 50,
-                            "value": 3.141592653589793
+                            "value": 4.188790204786391
                         },
                         {
                             "frame": 100,
-                            "value": 6.283185307179586
+                            "value": 8.377580409572783
                         }
                     ]
                 },
@@ -368,27 +368,27 @@
                     ],
                     "parent_point": {
                         "name": "PlanetCarrierAnim",
-                        "x": 60.0,
-                        "y": 60.0,
+                        "x": 100.0,
+                        "y": 100.0,
                         "z": 0
                     }
                 }
             ],
-            "start_angle": 2.827433388230814,
-            "number_of_teeth": 10
+            "start_angle": 3.5604716740684337,
+            "number_of_teeth": 15
         },
         "Planet3": {
             "name": "Planet3",
-            "diameter": 20.0,
+            "diameter": 30.0,
             "filename": "Planet3.stl",
             "_pressure_angle": 20,
             "_module": 1,
             "location": [
-                40.24623318809725,
-                63.128689300804616,
+                65.14089971016664,
+                103.13737581162015,
                 0
             ],
-            "gear_ratio_to_sun": 1.0,
+            "gear_ratio_to_sun": 0.75,
             "animations": [
                 {
                     "name": "FixedRing",
@@ -401,11 +401,11 @@
                         },
                         {
                             "frame": 50,
-                            "value": -9.42477796076938
+                            "value": -10.471975511965978
                         },
                         {
                             "frame": 100,
-                            "value": -18.84955592153876
+                            "value": -20.943951023931955
                         }
                     ]
                 },
@@ -429,8 +429,8 @@
                     ],
                     "parent_point": {
                         "name": "PlanetCarrierAnim",
-                        "x": 60.0,
-                        "y": 60.0,
+                        "x": 100.0,
+                        "y": 100.0,
                         "z": 0
                     }
                 },
@@ -445,11 +445,11 @@
                         },
                         {
                             "frame": 50,
-                            "value": 3.141592653589793
+                            "value": 4.188790204786391
                         },
                         {
                             "frame": 100,
-                            "value": 6.283185307179586
+                            "value": 8.377580409572783
                         }
                     ]
                 },
@@ -473,27 +473,27 @@
                     ],
                     "parent_point": {
                         "name": "PlanetCarrierAnim",
-                        "x": 60.0,
-                        "y": 60.0,
+                        "x": 100.0,
+                        "y": 100.0,
                         "z": 0
                     }
                 }
             ],
-            "start_angle": 5.969026041820607,
-            "number_of_teeth": 10
+            "start_angle": 7.120943348136867,
+            "number_of_teeth": 15
         },
         "Planet4": {
             "name": "Planet4",
-            "diameter": 20.0,
+            "diameter": 30.0,
             "filename": "Planet4.stl",
             "_pressure_angle": 20,
             "_module": 1,
             "location": [
-                59.99999999999999,
-                40.0,
+                98.429730937732,
+                65.035242671054,
                 0
             ],
-            "gear_ratio_to_sun": 1.0,
+            "gear_ratio_to_sun": 0.75,
             "animations": [
                 {
                     "name": "FixedRing",
@@ -506,11 +506,11 @@
                         },
                         {
                             "frame": 50,
-                            "value": -9.42477796076938
+                            "value": -10.471975511965978
                         },
                         {
                             "frame": 100,
-                            "value": -18.84955592153876
+                            "value": -20.943951023931955
                         }
                     ]
                 },
@@ -534,8 +534,8 @@
                     ],
                     "parent_point": {
                         "name": "PlanetCarrierAnim",
-                        "x": 60.0,
-                        "y": 60.0,
+                        "x": 100.0,
+                        "y": 100.0,
                         "z": 0
                     }
                 },
@@ -550,11 +550,11 @@
                         },
                         {
                             "frame": 50,
-                            "value": 3.141592653589793
+                            "value": 4.188790204786391
                         },
                         {
                             "frame": 100,
-                            "value": 6.283185307179586
+                            "value": 8.377580409572783
                         }
                     ]
                 },
@@ -578,26 +578,26 @@
                     ],
                     "parent_point": {
                         "name": "PlanetCarrierAnim",
-                        "x": 60.0,
-                        "y": 60.0,
+                        "x": 100.0,
+                        "y": 100.0,
                         "z": 0
                     }
                 }
             ],
-            "start_angle": 9.42477796076938,
-            "number_of_teeth": 10
+            "start_angle": 10.890854532444619,
+            "number_of_teeth": 15
         }
     },
     "carriers": {
         "PlanetCarrier": {
             "name": "PlanetCarrierAnim",
-            "x": 60.0,
-            "y": 60.0,
+            "x": 100.0,
+            "y": 100.0,
             "z": 0
         }
     },
-    "babylon_path": "C:\\Users\\rishi\\Google Drive\\Simulation blog\\DjangoServer\\SimulationBlog\\GearsPilot\\static\\GearsPilot\\Sun_10_Planet_10",
+    "babylon_path": "C:\\Users\\rishi\\Google Drive\\Simulation blog\\DjangoServer\\SimulationBlog\\GearsPilot\\static\\GearsPilot\\Sun_20_Planet_15_Pressure_20",
     "fusion_path": "C:\\Users\\rishi\\Google Drive\\Simulation blog\\Fusion_360_scripts\\Gearbox_Json_files",
     "blender_path": "C:\\Users\\rishi\\Google Drive\\Simulation blog\\Blender_Scripts\\Json_files",
-    "filename": "Sun_10_Planet_10.json"
+    "filename": "Sun_20_Planet_15_Pressure_20.json"
 }

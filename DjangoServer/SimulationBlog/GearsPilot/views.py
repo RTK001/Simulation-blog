@@ -4,28 +4,32 @@ import json
 import glob
 import os
 
+def find_min_max_diff(json_files, name, index, context):
+    vals_list = []
+    for json_file in json_files:
+        _, filename = os.path.split(json_file)
+        filename = filename.split(".json")[0]
+        value = filename.split("_")[2 * index + 1]
+        vals_list.append(int(value))
+    vals_list = list(set(vals_list))
+    vals_list.sort()
+    try:
+        context[name + "_diff"] = vals_list[1] - vals_list[0]
+        context[name + "_min"] = min(vals_list)
+        context[name + "_max"] = max(vals_list)
+    except IndexError:
+        context[name + "_diff"] = 0
+        context[name + "_min"] = min(vals_list)
+        context[name + "_max"] = max(vals_list)
+    return context
+
+
 # Create your views here.
 def index(request):
     staticloc = os.path.join(settings.BASE_DIR, "GearsPilot", "static", "GearsPilot")
     json_files = glob.glob(os.path.join(staticloc, "*", "*.json"))
-
-    sun_teeth_list  = []
-    planet_teeth_list  = []
-    for file in json_files:
-        dirname, filename = os.path.split(file)
-        filename = filename.split(".json")[0] # remove .json
-        sun_teeth, planet_teeth = filename.split("_")[1::2]
-        sun_teeth_list.append(int(sun_teeth))
-        planet_teeth_list.append(int(planet_teeth))
-
-    sun_teeth_list.sort()
-    planet_teeth_list.sort()
-    context = {
-                "sun_diff" : sun_teeth_list[1] - sun_teeth_list[0],
-                "sun_min" : min(sun_teeth_list),
-                "sun_max" : max(sun_teeth_list),
-                "planet_diff" : planet_teeth_list[1] - planet_teeth_list[0],
-                "planet_min" : min(planet_teeth_list),
-                "planet_max" : max(planet_teeth_list),
-                }
+    context = {}
+    parameters = ["sun", "planet", "pressure"]
+    for index, name in enumerate(parameters):
+        context = find_min_max_diff(json_files, name, index, context)
     return render(request, "GearsPilot/index2.html", context)

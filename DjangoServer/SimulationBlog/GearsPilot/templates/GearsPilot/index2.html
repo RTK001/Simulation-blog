@@ -96,13 +96,13 @@
           return Files;
           }
 
-      function importJsonMeshes(scene, panel, sunTeeth, planetTeeth)
+      function importJsonMeshes(scene, panel, sunTeeth, planetTeeth, pressureAngle)
       {
 
         sunTeeth = Math.round(sunTeeth);
         PlanetTeeth = Math.round(planetTeeth);
-        let base_address = "./static/GearsPilot/Sun_" + String(sunTeeth) + "_Planet_"+ String(planetTeeth) +"/";
-        let filename = "Sun_" + String(sunTeeth) + "_Planet_" + String(planetTeeth) + ".glb";
+        let base_address = "./static/GearsPilot/Sun_" + String(sunTeeth) + "_Planet_"+ String(planetTeeth) + "_Pressure_" + String(pressureAngle) + "/";
+        let filename = "Sun_" + String(sunTeeth) + "_Planet_" + String(planetTeeth) +  "_Pressure_" + String(pressureAngle) + ".glb";
 
         let noOfMeshes = scene.meshes.length - 1;
         for (let i = noOfMeshes; i > 0; i--)
@@ -196,19 +196,32 @@
         var speedSlider = createSlider(bottomPanel, "Speed: ", 5, 0, animationSpeed, 0.01, function(value) {speedSet(scene, value);});
         speedSlider.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
 
-        importJsonMeshes(scene, panel, 5, 10);
 
         // create Planet which currently does nothing
-        var planetSlider = createSlider(panel, "Planet Teeth: ", {{ planet_max }}, {{ planet_min }}, 10, {{ planet_diff }}, function(value) {
-          console.log("Currently does nothing!!");
+        var planetTeeth = 10;
+        var sunTeeth = 10;
+        var pressureAngle = 20;
+
+        importJsonMeshes(scene, panel, sunTeeth, planetTeeth, pressureAngle);
+
+        var planetSlider = createSlider(panel, "Planet Teeth: ", {{ planet_max }}, {{ planet_min }}, planetTeeth, {{ planet_diff }}, function(value) {
+          planetTeeth = value;
+          importJsonMeshes(scene, panel, sunTeeth, planetTeeth, pressureAngle);
+          speedSlider.value = 0.2;
         });
 
-        var sunSlider = createSlider(panel, "Sun Teeth: ", {{ sun_max }}, {{ sun_min }}, 5,  {{ sun_diff }}, function(value) {
-                let speedVal = speedSlider.value;
-                let planetTeeth = planetSlider.value;
-                importJsonMeshes(scene, panel, value, 10);
+        var sunSlider = createSlider(panel, "Sun Teeth: ", {{ sun_max }}, {{ sun_min }}, sunTeeth,  {{ sun_diff }}, function(value) {
+                sunTeeth = value;
+                importJsonMeshes(scene, panel, sunTeeth, planetTeeth, pressureAngle);
                 speedSlider.value = 0.2;
               });
+
+        var pressureSlider = createSlider(panel, "Pressure Angle: ", {{ pressure_max }}, {{ pressure_min }}, pressureAngle,  {{ pressure_diff }}, function(value) {
+                pressureAngle = value;
+                importJsonMeshes(scene, panel, sunTeeth, planetTeeth, value);
+                speedSlider.value = 0.2;
+              });
+
 
         var isPaused = false;
         var pauseButton = createButton(bottomPanel, "Pause", "Pause", function() {

@@ -251,7 +251,9 @@ class Planetary_Gears():
     def setup_dir(self):
         # create FolderName
         if self.name is None:
-            self.name = "Sun_" + str(self.gears["Sun"].number_of_teeth) + "_Planet_" + str(self.gears["Planet1"].number_of_teeth)
+            self.name = "Sun_" + str(self.gears["Sun"].number_of_teeth)
+            self.name += "_Planet_" + str(self.gears["Planet1"].number_of_teeth)
+            self.name += "_Pressure_" + str(self.pressure_angle)
 
         self.babylon_path = os.path.join(Planetary_Gears.babylon_folder, self.name)
         if not os.path.exists(self.babylon_path):
@@ -274,13 +276,17 @@ class Planetary_Gears():
 
 height = 5 #cm
 module = 1
-planet_teeth = 10
+planet_teeth_range = range(10, 25, 5)
+sun_teeth_range = range(10, 25, 5)
 pressure_angle = 20
-for sun_teeth in range(5, 25, 5):
-    sun_diam = sun_teeth * 2 / module
-    planet_diam = planet_teeth * 2 / module
-    a = Planetary_Gears(pressure_angle=pressure_angle, sun_diameter=sun_diam, planet_diameter=planet_diam, module=module, height=height)
-    a.save_json()
+
+for planet_teeth in planet_teeth_range:
+    for sun_teeth in sun_teeth_range:
+        sun_diam = sun_teeth * 2 / module
+        planet_diam = planet_teeth * 2 / module
+        a = Planetary_Gears(pressure_angle=pressure_angle, sun_diameter=sun_diam, planet_diameter=planet_diam, module=module, height=height)
+        a.save_json()
+
 
 
 if True:
@@ -288,7 +294,7 @@ if True:
     # Run Fusion 360
     fusion360_run_path = r"C:\Users\rishi\AppData\Local\Autodesk\webdeploy\production"
     launchers = glob.glob(os.path.join(fusion360_run_path, "*", "FusionLauncher.exe"))
-    #prc = subprocess.run(launchers[-1]) # will block until program closed
+    prc = subprocess.run(launchers[-1]) # will block until program closed
 
     # Run blender script
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
