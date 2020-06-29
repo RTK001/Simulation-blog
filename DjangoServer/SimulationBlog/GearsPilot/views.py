@@ -4,6 +4,8 @@ import json
 import glob
 import os
 
+from pprint import pprint
+
 def find_min_max_diff(json_files, name, index, context):
     vals_list = []
     for json_file in json_files:
@@ -28,7 +30,13 @@ def find_min_max_diff(json_files, name, index, context):
 def index(request):
     staticloc = os.path.join(settings.BASE_DIR, "GearsPilot", "static", "GearsPilot")
     json_files = glob.glob(os.path.join(staticloc, "*", "*.json"))
-    context = {}
+    context = {"jsons" : {}}
+    for file in json_files:
+        with open(file, "r") as f:
+            key = os.path.split(file)[1].split(".json")[0]
+            context["jsons"][key] = json.dumps(json.load(f))
+
+    pprint(context)
     parameters = ["sun", "planet", "pressure"]
     for index, name in enumerate(parameters):
         context = find_min_max_diff(json_files, name, index, context)

@@ -39,6 +39,11 @@
 </div>
 
     <script>
+      var jsons = {};
+      {% for key, value in jsons.items %}
+
+      jsons.{{key}} = JSON.parse('{{ value | escapejs }}');
+      {% endfor %}
 
       Tester = document.getElementById("tester");
       var trace1 = {
@@ -62,8 +67,21 @@
         Plotly.extendTraces("tester", {x:[[x_data]], y:[[y_data]]}, traces);
       }
 
+      function showHideElementId(id) {
+        let elem = document.getElementById(id);
+        if (elem.hidden) {
+          elem.hidden = false;
+          return false;
+        }
+        else {
+          elem.hidden = true;
+          return true;
+        }
+      }
+
       var canvas = document.getElementById("renderCanvas"); // Get the canvas element
       var engine = new BABYLON.Engine(canvas);
+      showHideElementId("tester");
 
       var animationSpeed = 1;
       function speedSet(scene, value)
@@ -79,22 +97,6 @@
         animationSpeed = value;
       }
 
-
-
-      function LoadJSON(scene, name) {
-          // Loads the JSON data
-          var Files = [];
-          // URL for JSON file. Should abstract this.
-          let fileListURL = "./static/GearsPilot/" + name + ".json";
-          let request = new XMLHttpRequest();
-          request.open("GET", fileListURL);
-          request.responseType = "json";
-          request.send();
-          request.onload = function(Files) {
-            Files = request.response;
-            }
-          return Files;
-          }
 
       function importJsonMeshes(scene, panel, sunTeeth, planetTeeth, pressureAngle)
       {
@@ -203,22 +205,30 @@
         var pressureAngle = 20;
 
         importJsonMeshes(scene, panel, sunTeeth, planetTeeth, pressureAngle);
+        var currentFileName = "Sun_" + String(sunTeeth) + "_Planet_" + String(planetTeeth) +  "_Pressure_" + String(pressureAngle);
+        var gearbox_json_file = jsons[currentFileName];
 
         var planetSlider = createSlider(panel, "Planet Teeth: ", {{ planet_max }}, {{ planet_min }}, planetTeeth, {{ planet_diff }}, function(value) {
           planetTeeth = value;
           importJsonMeshes(scene, panel, sunTeeth, planetTeeth, pressureAngle);
+          currentFileName = "Sun_" + String(sunTeeth) + "_Planet_" + String(planetTeeth) +  "_Pressure_" + String(pressureAngle);
+          gearbox_json_file = jsons[currentFileName];
           speedSlider.value = 0.2;
         });
 
         var sunSlider = createSlider(panel, "Sun Teeth: ", {{ sun_max }}, {{ sun_min }}, sunTeeth,  {{ sun_diff }}, function(value) {
                 sunTeeth = value;
                 importJsonMeshes(scene, panel, sunTeeth, planetTeeth, pressureAngle);
+                currentFileName = "Sun_" + String(sunTeeth) + "_Planet_" + String(planetTeeth) +  "_Pressure_" + String(pressureAngle);
+                gearbox_json_file = jsons[currentFileName];
                 speedSlider.value = 0.2;
               });
 
         var pressureSlider = createSlider(panel, "Pressure Angle: ", {{ pressure_max }}, {{ pressure_min }}, pressureAngle,  {{ pressure_diff }}, function(value) {
                 pressureAngle = value;
                 importJsonMeshes(scene, panel, sunTeeth, planetTeeth, value);
+                currentFileName = "Sun_" + String(sunTeeth) + "_Planet_" + String(planetTeeth) +  "_Pressure_" + String(pressureAngle);
+                gearbox_json_file = jsons[currentFileName];
                 speedSlider.value = 0.2;
               });
 
@@ -250,7 +260,19 @@
 
 
         var selectedName = createText(leftPanel, "Selected Object: ");
-
+        selectedName.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+        var selectedTeeth = createText(leftPanel, "Number of Teeth: ");
+        selectedTeeth.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+        var selectedDiameter = createText(leftPanel, "Pitch Diameter: ");
+        selectedDiameter.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+        var plotButton = createButton(leftPanel, "PlotButton", "Plot X and Y coordinates", function() {
+          let isHidden = showHideElementId("tester");
+          if (isHidden)
+          {plotButton.background = "black";}
+          else
+          {plotButton.background = "orange";}
+        })
+        plotButton.width = 1;
 
 
         var Selected = null;
@@ -268,6 +290,8 @@
                     Selected = mesh;
                     leftPanel.isVisible = true;
                     selectedName.text = "Selected Object: " + Selected.name;
+                    selectedTeeth.text = "Number of Teeth: " + gearbox_json_file["gears"][Selected.name]["number_of_teeth"];
+                    selectedDiameter.text = "Pitch Diameter: " + gearbox_json_file["gears"][Selected.name]["diameter"] + "mm";
                   }
                 else
                 {mesh.material.diffuseColor = defaultDiffuseColor;}
