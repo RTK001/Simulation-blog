@@ -1,0 +1,603 @@
+{
+    "pressure_angle": 20,
+    "sun_diameter": 32.0,
+    "planet_diameter": 20.0,
+    "ring_diameter": 72.0,
+    "module": 1,
+    "height": 5,
+    "name": "Sun_16_Planet_10_Pressure_20",
+    "x_offset": 72.0,
+    "y_offset": 72.0,
+    "planet_locations": [
+        [
+            98.0,
+            72.0,
+            0
+        ],
+        [
+            72.0,
+            98.0,
+            0
+        ],
+        [
+            46.0,
+            72.0,
+            0
+        ],
+        [
+            72.0,
+            46.0,
+            0
+        ]
+    ],
+    "gear_start_angles": [
+        0.0,
+        4.084070449666731,
+        8.168140899333462,
+        12.252211349000193
+    ],
+    "boundary_conditions": [
+        "FixedRing",
+        "FixedSun"
+    ],
+    "sun_speed": [
+        3.25,
+        0.0
+    ],
+    "ring_speed": [
+        0.0,
+        1.4444444444444444
+    ],
+    "carrier_speed": [
+        1.0,
+        1.0
+    ],
+    "planet_speed": [
+        -3.6,
+        1.6
+    ],
+    "gears": {
+        "Sun": {
+            "name": "Sun",
+            "diameter": 32.0,
+            "filename": "Sun.stl",
+            "_pressure_angle": 20,
+            "_module": 1,
+            "location": [
+                72.0,
+                72.0,
+                0
+            ],
+            "gear_ratio_to_sun": 1,
+            "animations": [
+                {
+                    "name": "FixedRing",
+                    "variable": "rotation.y",
+                    "type": "BABYLON.Animation.ANIMATIONTYPE_FLOAT",
+                    "keyframes": [
+                        {
+                            "frame": 0,
+                            "value": 0.0
+                        },
+                        {
+                            "frame": 50,
+                            "value": 10.210176124166829
+                        },
+                        {
+                            "frame": 100,
+                            "value": 20.420352248333657
+                        }
+                    ]
+                },
+                {
+                    "name": "FixedSun",
+                    "variable": "rotation.y",
+                    "type": "BABYLON.Animation.ANIMATIONTYPE_FLOAT",
+                    "keyframes": [
+                        {
+                            "frame": 0,
+                            "value": 0.0
+                        },
+                        {
+                            "frame": 50,
+                            "value": 0.0
+                        },
+                        {
+                            "frame": 100,
+                            "value": 0.0
+                        }
+                    ]
+                }
+            ],
+            "start_angle": 0,
+            "number_of_teeth": 16
+        },
+        "Ring": {
+            "name": "Ring",
+            "diameter": 72.0,
+            "filename": "Ring.stl",
+            "_pressure_angle": 20,
+            "_module": 1,
+            "location": [
+                72.0,
+                72.0,
+                0
+            ],
+            "gear_ratio_to_sun": 0.0,
+            "animations": [
+                {
+                    "name": "FixedRing",
+                    "variable": "rotation.y",
+                    "type": "BABYLON.Animation.ANIMATIONTYPE_FLOAT",
+                    "keyframes": [
+                        {
+                            "frame": 0,
+                            "value": 0.0
+                        },
+                        {
+                            "frame": 50,
+                            "value": 0.0
+                        },
+                        {
+                            "frame": 100,
+                            "value": 0.0
+                        }
+                    ]
+                },
+                {
+                    "name": "FixedSun",
+                    "variable": "rotation.y",
+                    "type": "BABYLON.Animation.ANIMATIONTYPE_FLOAT",
+                    "keyframes": [
+                        {
+                            "frame": 0,
+                            "value": 0.0
+                        },
+                        {
+                            "frame": 50,
+                            "value": 4.537856055185257
+                        },
+                        {
+                            "frame": 100,
+                            "value": 9.075712110370514
+                        }
+                    ]
+                }
+            ],
+            "start_angle": 0,
+            "number_of_teeth": 36
+        },
+        "Planet1": {
+            "name": "Planet1",
+            "diameter": 20.0,
+            "filename": "Planet1.stl",
+            "_pressure_angle": 20,
+            "_module": 1,
+            "location": [
+                98.0,
+                72.0,
+                0
+            ],
+            "gear_ratio_to_sun": 0.625,
+            "animations": [
+                {
+                    "name": "FixedRing",
+                    "variable": "rotation.y",
+                    "type": "BABYLON.Animation.ANIMATIONTYPE_FLOAT",
+                    "keyframes": [
+                        {
+                            "frame": 0,
+                            "value": -0.0
+                        },
+                        {
+                            "frame": 50,
+                            "value": -11.309733552923255
+                        },
+                        {
+                            "frame": 100,
+                            "value": -22.61946710584651
+                        }
+                    ]
+                },
+                {
+                    "name": "FixedRing",
+                    "variable": "rotation.y",
+                    "type": "BABYLON.Animation.ANIMATIONTYPE_FLOAT",
+                    "keyframes": [
+                        {
+                            "frame": 0,
+                            "value": 0.0
+                        },
+                        {
+                            "frame": 50,
+                            "value": 3.141592653589793
+                        },
+                        {
+                            "frame": 100,
+                            "value": 6.283185307179586
+                        }
+                    ],
+                    "parent_point": {
+                        "name": "PlanetCarrierAnim",
+                        "x": 72.0,
+                        "y": 72.0,
+                        "z": 0
+                    }
+                },
+                {
+                    "name": "FixedSun",
+                    "variable": "rotation.y",
+                    "type": "BABYLON.Animation.ANIMATIONTYPE_FLOAT",
+                    "keyframes": [
+                        {
+                            "frame": 0,
+                            "value": 0.0
+                        },
+                        {
+                            "frame": 50,
+                            "value": 5.026548245743669
+                        },
+                        {
+                            "frame": 100,
+                            "value": 10.053096491487338
+                        }
+                    ]
+                },
+                {
+                    "name": "FixedSun",
+                    "variable": "rotation.y",
+                    "type": "BABYLON.Animation.ANIMATIONTYPE_FLOAT",
+                    "keyframes": [
+                        {
+                            "frame": 0,
+                            "value": 0.0
+                        },
+                        {
+                            "frame": 50,
+                            "value": 3.141592653589793
+                        },
+                        {
+                            "frame": 100,
+                            "value": 6.283185307179586
+                        }
+                    ],
+                    "parent_point": {
+                        "name": "PlanetCarrierAnim",
+                        "x": 72.0,
+                        "y": 72.0,
+                        "z": 0
+                    }
+                }
+            ],
+            "start_angle": 0.0,
+            "number_of_teeth": 10
+        },
+        "Planet2": {
+            "name": "Planet2",
+            "diameter": 20.0,
+            "filename": "Planet2.stl",
+            "_pressure_angle": 20,
+            "_module": 1,
+            "location": [
+                72.0,
+                98.0,
+                0
+            ],
+            "gear_ratio_to_sun": 0.625,
+            "animations": [
+                {
+                    "name": "FixedRing",
+                    "variable": "rotation.y",
+                    "type": "BABYLON.Animation.ANIMATIONTYPE_FLOAT",
+                    "keyframes": [
+                        {
+                            "frame": 0,
+                            "value": -0.0
+                        },
+                        {
+                            "frame": 50,
+                            "value": -11.309733552923255
+                        },
+                        {
+                            "frame": 100,
+                            "value": -22.61946710584651
+                        }
+                    ]
+                },
+                {
+                    "name": "FixedRing",
+                    "variable": "rotation.y",
+                    "type": "BABYLON.Animation.ANIMATIONTYPE_FLOAT",
+                    "keyframes": [
+                        {
+                            "frame": 0,
+                            "value": 0.0
+                        },
+                        {
+                            "frame": 50,
+                            "value": 3.141592653589793
+                        },
+                        {
+                            "frame": 100,
+                            "value": 6.283185307179586
+                        }
+                    ],
+                    "parent_point": {
+                        "name": "PlanetCarrierAnim",
+                        "x": 72.0,
+                        "y": 72.0,
+                        "z": 0
+                    }
+                },
+                {
+                    "name": "FixedSun",
+                    "variable": "rotation.y",
+                    "type": "BABYLON.Animation.ANIMATIONTYPE_FLOAT",
+                    "keyframes": [
+                        {
+                            "frame": 0,
+                            "value": 0.0
+                        },
+                        {
+                            "frame": 50,
+                            "value": 5.026548245743669
+                        },
+                        {
+                            "frame": 100,
+                            "value": 10.053096491487338
+                        }
+                    ]
+                },
+                {
+                    "name": "FixedSun",
+                    "variable": "rotation.y",
+                    "type": "BABYLON.Animation.ANIMATIONTYPE_FLOAT",
+                    "keyframes": [
+                        {
+                            "frame": 0,
+                            "value": 0.0
+                        },
+                        {
+                            "frame": 50,
+                            "value": 3.141592653589793
+                        },
+                        {
+                            "frame": 100,
+                            "value": 6.283185307179586
+                        }
+                    ],
+                    "parent_point": {
+                        "name": "PlanetCarrierAnim",
+                        "x": 72.0,
+                        "y": 72.0,
+                        "z": 0
+                    }
+                }
+            ],
+            "start_angle": 4.084070449666731,
+            "number_of_teeth": 10
+        },
+        "Planet3": {
+            "name": "Planet3",
+            "diameter": 20.0,
+            "filename": "Planet3.stl",
+            "_pressure_angle": 20,
+            "_module": 1,
+            "location": [
+                46.0,
+                72.0,
+                0
+            ],
+            "gear_ratio_to_sun": 0.625,
+            "animations": [
+                {
+                    "name": "FixedRing",
+                    "variable": "rotation.y",
+                    "type": "BABYLON.Animation.ANIMATIONTYPE_FLOAT",
+                    "keyframes": [
+                        {
+                            "frame": 0,
+                            "value": -0.0
+                        },
+                        {
+                            "frame": 50,
+                            "value": -11.309733552923255
+                        },
+                        {
+                            "frame": 100,
+                            "value": -22.61946710584651
+                        }
+                    ]
+                },
+                {
+                    "name": "FixedRing",
+                    "variable": "rotation.y",
+                    "type": "BABYLON.Animation.ANIMATIONTYPE_FLOAT",
+                    "keyframes": [
+                        {
+                            "frame": 0,
+                            "value": 0.0
+                        },
+                        {
+                            "frame": 50,
+                            "value": 3.141592653589793
+                        },
+                        {
+                            "frame": 100,
+                            "value": 6.283185307179586
+                        }
+                    ],
+                    "parent_point": {
+                        "name": "PlanetCarrierAnim",
+                        "x": 72.0,
+                        "y": 72.0,
+                        "z": 0
+                    }
+                },
+                {
+                    "name": "FixedSun",
+                    "variable": "rotation.y",
+                    "type": "BABYLON.Animation.ANIMATIONTYPE_FLOAT",
+                    "keyframes": [
+                        {
+                            "frame": 0,
+                            "value": 0.0
+                        },
+                        {
+                            "frame": 50,
+                            "value": 5.026548245743669
+                        },
+                        {
+                            "frame": 100,
+                            "value": 10.053096491487338
+                        }
+                    ]
+                },
+                {
+                    "name": "FixedSun",
+                    "variable": "rotation.y",
+                    "type": "BABYLON.Animation.ANIMATIONTYPE_FLOAT",
+                    "keyframes": [
+                        {
+                            "frame": 0,
+                            "value": 0.0
+                        },
+                        {
+                            "frame": 50,
+                            "value": 3.141592653589793
+                        },
+                        {
+                            "frame": 100,
+                            "value": 6.283185307179586
+                        }
+                    ],
+                    "parent_point": {
+                        "name": "PlanetCarrierAnim",
+                        "x": 72.0,
+                        "y": 72.0,
+                        "z": 0
+                    }
+                }
+            ],
+            "start_angle": 8.168140899333462,
+            "number_of_teeth": 10
+        },
+        "Planet4": {
+            "name": "Planet4",
+            "diameter": 20.0,
+            "filename": "Planet4.stl",
+            "_pressure_angle": 20,
+            "_module": 1,
+            "location": [
+                72.0,
+                46.0,
+                0
+            ],
+            "gear_ratio_to_sun": 0.625,
+            "animations": [
+                {
+                    "name": "FixedRing",
+                    "variable": "rotation.y",
+                    "type": "BABYLON.Animation.ANIMATIONTYPE_FLOAT",
+                    "keyframes": [
+                        {
+                            "frame": 0,
+                            "value": -0.0
+                        },
+                        {
+                            "frame": 50,
+                            "value": -11.309733552923255
+                        },
+                        {
+                            "frame": 100,
+                            "value": -22.61946710584651
+                        }
+                    ]
+                },
+                {
+                    "name": "FixedRing",
+                    "variable": "rotation.y",
+                    "type": "BABYLON.Animation.ANIMATIONTYPE_FLOAT",
+                    "keyframes": [
+                        {
+                            "frame": 0,
+                            "value": 0.0
+                        },
+                        {
+                            "frame": 50,
+                            "value": 3.141592653589793
+                        },
+                        {
+                            "frame": 100,
+                            "value": 6.283185307179586
+                        }
+                    ],
+                    "parent_point": {
+                        "name": "PlanetCarrierAnim",
+                        "x": 72.0,
+                        "y": 72.0,
+                        "z": 0
+                    }
+                },
+                {
+                    "name": "FixedSun",
+                    "variable": "rotation.y",
+                    "type": "BABYLON.Animation.ANIMATIONTYPE_FLOAT",
+                    "keyframes": [
+                        {
+                            "frame": 0,
+                            "value": 0.0
+                        },
+                        {
+                            "frame": 50,
+                            "value": 5.026548245743669
+                        },
+                        {
+                            "frame": 100,
+                            "value": 10.053096491487338
+                        }
+                    ]
+                },
+                {
+                    "name": "FixedSun",
+                    "variable": "rotation.y",
+                    "type": "BABYLON.Animation.ANIMATIONTYPE_FLOAT",
+                    "keyframes": [
+                        {
+                            "frame": 0,
+                            "value": 0.0
+                        },
+                        {
+                            "frame": 50,
+                            "value": 3.141592653589793
+                        },
+                        {
+                            "frame": 100,
+                            "value": 6.283185307179586
+                        }
+                    ],
+                    "parent_point": {
+                        "name": "PlanetCarrierAnim",
+                        "x": 72.0,
+                        "y": 72.0,
+                        "z": 0
+                    }
+                }
+            ],
+            "start_angle": 12.252211349000193,
+            "number_of_teeth": 10
+        }
+    },
+    "carriers": {
+        "PlanetCarrier": {
+            "name": "PlanetCarrierAnim",
+            "x": 72.0,
+            "y": 72.0,
+            "z": 0
+        }
+    },
+    "babylon_path": "C:\\Users\\rishi\\Google Drive\\Simulation blog\\DjangoServer\\SimulationBlog\\GearsPilot\\static\\GearsPilot\\Sun_16_Planet_10_Pressure_20",
+    "fusion_path": "C:\\Users\\rishi\\Google Drive\\Simulation blog\\Fusion_360_scripts\\Gearbox_Json_files",
+    "blender_path": "C:\\Users\\rishi\\Google Drive\\Simulation blog\\Blender_Scripts\\Json_files",
+    "filename": "Sun_16_Planet_10_Pressure_20.json"
+}
