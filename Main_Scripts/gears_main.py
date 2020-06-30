@@ -282,16 +282,17 @@ class Planetary_Gears():
 
 height = 5 #cm
 module = 1
-planet_teeth_range = range(10, 25, 5)
-sun_teeth_range = range(10, 25, 5)
-pressure_angle = 20
+planet_teeth_range = range(10, 25, 2)
+sun_teeth_range = range(10, 25, 2)
+pressure_angle_range = [14.5, 20]
 
-for planet_teeth in planet_teeth_range:
-    for sun_teeth in sun_teeth_range:
-        sun_diam = sun_teeth * 2 / module
-        planet_diam = planet_teeth * 2 / module
-        a = Planetary_Gears(pressure_angle=pressure_angle, sun_diameter=sun_diam, planet_diameter=planet_diam, module=module, height=height)
-        a.save_json()
+for pressure_angle in pressure_angle_range:
+    for planet_teeth in planet_teeth_range:
+        for sun_teeth in sun_teeth_range:
+            sun_diam = sun_teeth * 2 / module
+            planet_diam = planet_teeth * 2 / module
+            a = Planetary_Gears(pressure_angle=pressure_angle, sun_diameter=sun_diam, planet_diameter=planet_diam, module=module, height=height)
+            a.save_json()
 
 
 
