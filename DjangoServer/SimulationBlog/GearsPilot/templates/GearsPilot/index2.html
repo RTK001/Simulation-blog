@@ -209,27 +209,36 @@
         var gearbox_json_file = jsons[currentFileName];
 
         var planetSlider = createSlider(panel, "Planet Teeth: ", {{ planet_max }}, {{ planet_min }}, planetTeeth, {{ planet_diff }}, function(value) {
+          if (planetTeeth != value)
+          {
           planetTeeth = value;
           importJsonMeshes(scene, panel, sunTeeth, planetTeeth, pressureAngle);
           currentFileName = "Sun_" + String(sunTeeth) + "_Planet_" + String(planetTeeth) +  "_Pressure_" + String(pressureAngle);
           gearbox_json_file = jsons[currentFileName];
           speedSlider.value = 0.2;
+        }
         });
 
         var sunSlider = createSlider(panel, "Sun Teeth: ", {{ sun_max }}, {{ sun_min }}, sunTeeth,  {{ sun_diff }}, function(value) {
-                sunTeeth = value;
-                importJsonMeshes(scene, panel, sunTeeth, planetTeeth, pressureAngle);
-                currentFileName = "Sun_" + String(sunTeeth) + "_Planet_" + String(planetTeeth) +  "_Pressure_" + String(pressureAngle);
-                gearbox_json_file = jsons[currentFileName];
-                speedSlider.value = 0.2;
+                if (sunTeeth != value)
+                {
+                  sunTeeth = value;
+                  importJsonMeshes(scene, panel, sunTeeth, planetTeeth, pressureAngle);
+                  currentFileName = "Sun_" + String(sunTeeth) + "_Planet_" + String(planetTeeth) +  "_Pressure_" + String(pressureAngle);
+                  gearbox_json_file = jsons[currentFileName];
+                  speedSlider.value = 0.2;
+                }
               });
 
         var pressureSlider = createSlider(panel, "Pressure Angle: ", {{ pressure_max }}, {{ pressure_min }}, pressureAngle,  {{ pressure_diff }}, function(value) {
+            if (pressureAngle != value)
+            {
                 pressureAngle = value;
                 importJsonMeshes(scene, panel, sunTeeth, planetTeeth, value);
                 currentFileName = "Sun_" + String(sunTeeth) + "_Planet_" + String(planetTeeth) +  "_Pressure_" + String(pressureAngle);
                 gearbox_json_file = jsons[currentFileName];
                 speedSlider.value = 0.2;
+              }
               });
 
 
@@ -256,7 +265,7 @@
           else
           {engine.enterFullscreen();}
         });
-        fullScreenButton.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+        fullScreenButton.left = "80%";
 
 
         var selectedName = createText(leftPanel, "Selected Object: ");
